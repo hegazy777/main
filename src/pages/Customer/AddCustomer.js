@@ -25,6 +25,7 @@ import Icon from 'src/@core/components/icon'
 import axios from 'axios';
 import { TextField } from '@mui/material'
 import { boolean } from 'yup'
+import baseUrl from 'src/API/apiConfig'
 
 const showErrors = (field, valueLen, min) => {
   if (valueLen === 0) {
@@ -73,7 +74,7 @@ const AddCustomer = props => {
   useEffect(() => {
     const fetchCities = async () => {
       try {
-        const response = await axios.get('https://tqneen-testing-be1-dot-tqneen-406411.ew.r.appspot.com/api/cities', {
+        const response = await axios.get(`${baseUrl}/api/cities`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -88,7 +89,7 @@ const AddCustomer = props => {
 
   const fetchAreas = async (cityId) => {
     try {
-      const response = await axios.get('https://tqneen-testing-be1-dot-tqneen-406411.ew.r.appspot.com/api/cities/' + cityId, {
+      const response = await axios.get(`${baseUrl}/api/cities/` + cityId, {
         headers: {
           Authorization: `Bearer ${token}`,
         }
@@ -123,7 +124,7 @@ const AddCustomer = props => {
   const onSubmit = async (data) => {
     const { numOfExperience, is_active,fees, ...restOfData } = data
     try {
-      const response = await axios.post('https://tqneen-testing-be1-dot-tqneen-406411.ew.r.appspot.com/api/admin/users', {
+      const response = await axios.post(`${baseUrl}/api/admin/users`, {
         type: "customer",
         ...restOfData,
         is_active:boolean
@@ -390,7 +391,7 @@ const AddCustomer = props => {
 
             )}
           />
-            <Controller
+            {/* <Controller
             name='is_active'
             control={control}
             rules={{ required: false }}
@@ -411,7 +412,7 @@ const AddCustomer = props => {
                 <MenuItem value='false'>not active</MenuItem>
               </CustomTextField>
             )}
-          />
+          /> */}
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Button type='submit' variant='contained' sx={{ mr: 3 }} >
               Submit

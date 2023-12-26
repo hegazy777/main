@@ -26,6 +26,7 @@ import axios from 'axios'
 import EditArea from './editarea'
 import AddArea from './addarea'
 import { fetchData } from 'src/store/apps/user'
+import baseUrl from 'src/API/apiConfig'
 
 // ** Styled Components
 
@@ -131,7 +132,7 @@ const Area = () => {
 
   const fetchData = async () => {
     try {
-      const response = await axios.get('https://tqneen-testing-be1-dot-tqneen-406411.ew.r.appspot.com//api/areas', {
+      const response = await axios.get(`${baseUrl}/api/areas`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }

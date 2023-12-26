@@ -11,6 +11,7 @@ import DialogActions from '@mui/material/DialogActions'
 import CustomTextField from 'src/@core/components/mui/text-field'
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import baseUrl from 'src/API/apiConfig'
 
 const AddArea = ({ open, onClose, fetchData }) => {
   const [areaNameEn, setAreaNameEn] = useState('');
@@ -26,7 +27,7 @@ const AddArea = ({ open, onClose, fetchData }) => {
     // fetch data
     const fetchCiteis = async () => {
       try {
-        const response = await axios.get('https://tqneen-testing-be1-dot-tqneen-406411.ew.r.appspot.com/api/cities', {
+        const response = await axios.get(`${baseUrl}/api/cities`, {
           headers: {
             Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NTY1YTM1NjNhMjE2N2Q3NDUxNTRhZGEiLCJ0eXBlIjoiYWRtaW4iLCJpZCI6MSwiaWF0IjoxNzAyMzY2NDE0fQ.3bOsxc0tjcOThhsmUaUsw6lNIumDWp3H9sC8FjU1bcs`
           }
@@ -57,7 +58,7 @@ const AddArea = ({ open, onClose, fetchData }) => {
         city: cityId,
       };
 
-      const response = await axios.post("https://tqneen-testing-be1-dot-tqneen-406411.ew.r.appspot.com/api/areas", data, {
+      const response = await axios.post(`${baseUrl}/api/areas`, data, {
         headers: {
           Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NTY1YTM1NjNhMjE2N2Q3NDUxNTRhZGEiLCJ0eXBlIjoiYWRtaW4iLCJpZCI6MSwiaWF0IjoxNzAyMzY2NDE0fQ.3bOsxc0tjcOThhsmUaUsw6lNIumDWp3H9sC8FjU1bcs"
         }

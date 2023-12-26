@@ -21,10 +21,12 @@ import { Button } from '@mui/material'
 
 import axios from 'axios'
 
-import AddCity from './addcity'
-
-import EditCity from './editcity'
+import AddCity from './addspecializations'
+import EditSpecializations from './editspecializations'
+import AddSpecializations from './addspecializations'
 import baseUrl from 'src/API/apiConfig'
+
+// import EditCity from './editcity'
 
 // ** Styled Components
 
@@ -47,16 +49,16 @@ const defaultColumns = [
   {
     flex: 0.1,
     minWidth: 100,
-    field: 'cityAr',
-    headerName: 'city en',
+    field: 'specializationsAr',
+    headerName: 'specializations en',
     renderCell: ({ row }) => <Typography sx={{ color: 'text.secondary' }}>{row.name.en} </Typography>
   },
 
   {
     flex: 0.1,
     minWidth: 100,
-    field: 'cityEn',
-    headerName: 'city ar',
+    field: 'specializationsEn',
+    headerName: 'specializations ar',
     renderCell: ({ row }) =>
     <Typography sx={{ display: 'flex', color: 'text.secondary' }}>
     {row.name.ar}
@@ -65,9 +67,9 @@ const defaultColumns = [
   {
     flex: 0.1,
     minWidth: 100,
-    field: 'Number of area',
-    headerName: 'Number of area',
-    renderCell: ({ row }) => <Typography sx={{ color: 'text.secondary' }}> ({row.areas.length}) </Typography>
+    field: 'Number of topics',
+    headerName: 'Number of topics',
+    renderCell: ({ row }) => <Typography sx={{ color: 'text.secondary' }}> ({row.topics.length}) </Typography>
   },
   {
     flex: 0.15,
@@ -81,13 +83,13 @@ const defaultColumns = [
 ]
 
 /* eslint-enable */
-const City = () => {
+const Specializations = () => {
   // ** State
   const [data, setDates] = useState([])
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 })
   const [openAdd, setOpenAdd] = useState(false)
   const [openEdit, setOpenEdit] = useState(false)
-  const [editCityId, setEditCityId] = useState(null)
+  const [SpecializationsId, setEditSpecializationsId] = useState(null)
 
   // Handle Edit dialog
   const handleAddClickOpen = () => setOpenAdd(true)
@@ -104,13 +106,13 @@ const City = () => {
       headerName: 'Actions',
       renderCell: ({ row }) => {
         const handleEditClick = id => {
-          setEditCityId(id)
+          setEditSpecializationsId(id)
           handleEditClickOpen();
         };
 
         return (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Tooltip title='Delete city'>
+            <Tooltip title='Delete specializations'>
               <IconButton size='small' sx={{ color: 'text.secondary' }}>
                 <Icon icon='tabler:trash' />
               </IconButton>
@@ -131,7 +133,7 @@ const City = () => {
 
     const fetchData = async () => {
       try {
-        const response = await axios.get(`${baseUrl}/api/cities`, {
+        const response = await axios.get(`${baseUrl}/api/specializations`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`
           }
@@ -162,7 +164,7 @@ const City = () => {
           <Box sx={{ rowGap: 2, display: 'flex', flexWrap: 'wrap' }}>
             <Button variant='contained' sx={{ '& svg': { mr: 2 } }} onClick={handleAddClickOpen}>
               <Icon fontSize='1.125rem' icon='tabler:plus' />
-              Add New City
+              Add New Specializations
             </Button>
           </Box>
         </Box>
@@ -185,10 +187,10 @@ const City = () => {
           />
         </Card>
       </Grid>
-      <AddCity open={openAdd} onClose={() => {setOpenAdd(false)}} fetchData={fetchData} />
-      <EditCity open={openEdit} onClose={() => {setOpenEdit(false)}} cityId={editCityId} fetchData={fetchData} />
+      <AddSpecializations open={openAdd} onClose={() => {setOpenAdd(false)}} fetchData={fetchData} />
+      <EditSpecializations open={openEdit} onClose={() => {setOpenEdit(false)}} SpecializationsId={SpecializationsId} fetchData={fetchData} />
     </Grid>
   )
 }
 
-export default City
+export default Specializations

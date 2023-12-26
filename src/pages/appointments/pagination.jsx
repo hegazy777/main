@@ -37,6 +37,7 @@ import CustomTextField from 'src/@core/components/mui/text-field'
 
 // ** Styled Components
 import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
+import baseUrl from 'src/API/apiConfig'
 
 // ** Styled component for the link in the dataTable
 const LinkStyled = styled(Link)(({ theme }) => ({
@@ -241,7 +242,7 @@ const Pagination = () => {
         const { page, pageSize } = paginationModel;
 
         const response = await axios.get(
-          `https://tqneen-testing-be1-dot-tqneen-406411.ew.r.appspot.com/api/appointments`,
+          `${baseUrl}/api/appointments`,
           {
             headers,
             params: {

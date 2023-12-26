@@ -17,6 +17,7 @@ import DialogActions from '@mui/material/DialogActions'
 import CustomTextField from 'src/@core/components/mui/text-field'
 import { use } from 'i18next';
 import { headers } from 'next/dist/client/components/headers';
+import baseUrl from 'src/API/apiConfig';
 
 const EditArea = ({ open, onClose, areaId, fetchData }) => {
   // ** States
@@ -36,7 +37,7 @@ const EditArea = ({ open, onClose, areaId, fetchData }) => {
     const fetchArea = async () => {
 
       try {
-        const response = await axios.get(`https://tqneen-testing-be1-dot-tqneen-406411.ew.r.appspot.com/api/areas/${areaId}`, {
+        const response = await axios.get(`${baseUrl}/api/areas/${areaId}`, {
           headers: {
             Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NTY1YTM1NjNhMjE2N2Q3NDUxNTRhZGEiLCJ0eXBlIjoiYWRtaW4iLCJpZCI6MSwiaWF0IjoxNzAyMzY2NDE0fQ.3bOsxc0tjcOThhsmUaUsw6lNIumDWp3H9sC8FjU1bcs"
           }
@@ -62,7 +63,7 @@ const EditArea = ({ open, onClose, areaId, fetchData }) => {
   //   const fetchCities = async () => {
   //     try {
   //       const response = await axios.get(
-  //         'https://tqneen-testing-be1-dot-tqneen-406411.ew.r.appspot.com/api/cities',
+  //         'https://tqneen-rlyoguxn5a-uc.a.run.app/api/cities',
   //         {
   //           headers: {
   //             Authorization:
@@ -89,7 +90,7 @@ const EditArea = ({ open, onClose, areaId, fetchData }) => {
     const fetchCities = async () => {
       try {
         const response = await axios.get(
-          'https://tqneen-testing-be1-dot-tqneen-406411.ew.r.appspot.com/api/cities',
+          `${baseUrl}/api/cities`,
           {
             headers: {
               Authorization:
@@ -120,7 +121,7 @@ const EditArea = ({ open, onClose, areaId, fetchData }) => {
       //   city: cityId,
       // };
 
-      const response = await axios.put(`https://tqneen-testing-be1-dot-tqneen-406411.ew.r.appspot.com/api/areas/${areaId}`, {
+      const response = await axios.put(`${baseUrl}/api/areas/${areaId}`, {
         name: {
           en: areaNameEn,
           ar: areaNameAr,

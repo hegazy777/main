@@ -9,65 +9,82 @@ import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 import CustomTextField from 'src/@core/components/mui/text-field'
-
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { boolean } from 'yup'
 import baseUrl from 'src/API/apiConfig'
 
-// ...
+const AddTopics = ({ open, onClose, fetchData }) => {
+  const [areaNameEn, setAreaNameEn] = useState('');
+  const [areaNameAr, setAreaNameAr] = useState('');
+  const [areaStatus, setAreaStatus] = useState('');
+  const [cityId, setCityId] = useState('');
+  const [cities, setCities] = useState([]);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+
+  // select city api
+  useEffect(() => {
+    // fetch data
+    const fetchCiteis = async () => {
+      try {
+        const response = await axios.get(`${baseUrl}/api/cities`, {
+          headers: {
+            Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NTY1YTM1NjNhMjE2N2Q3NDUxNTRhZGEiLCJ0eXBlIjoiYWRtaW4iLCJpZCI6MSwiaWF0IjoxNzAyMzY2NDE0fQ.3bOsxc0tjcOThhsmUaUsw6lNIumDWp3H9sC8FjU1bcs`
+          }
+        });
+        setCities(response.data.data);
+        console.log("city", response);
+        setSuccessMessage('Area added successfully!');
+        setErrorMessage('');
+      } catch (error) {
+        setErrorMessage('Failed to add area.');
+        setSuccessMessage('');
+        console.log(error);
+      }
+    }
+    fetchCiteis()
+  }, []);
 
 
-
-
-const AddCity = ({ open, onClose ,fetchData}) => {
-
-  const [cityNameEn, setCityNameEn] = useState('');
-  const [cityNameAr, setCityNameAr] = useState('');
-  const [cityStatus, setCityStatus] = useState('');
-  const [CityId, setCityId] = useState();
-
-  const handleAddCity = async () => {
+  const handleAddArea = async (e) => {
+    e.preventDefault();
     try {
       const data = {
         name: {
-          ar: cityNameAr,
-          en: cityNameEn
+          ar: areaNameAr,
+          en: areaNameEn
         },
-        is_active: Boolean(cityStatus)
+        is_active: Boolean(areaStatus),
+        city: cityId,
       };
 
-      const response = await axios.post(`${baseUrl}/api/cities`, data, {
+      const response = await axios.post(`${baseUrl}/api/areas`, data, {
         headers: {
           Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NTY1YTM1NjNhMjE2N2Q3NDUxNTRhZGEiLCJ0eXBlIjoiYWRtaW4iLCJpZCI6MSwiaWF0IjoxNzAyMzY2NDE0fQ.3bOsxc0tjcOThhsmUaUsw6lNIumDWp3H9sC8FjU1bcs"
         }
       });
-
-      // Handle the response as needed
-      console.log(response.data);
-
       fetchData();
+      setAreaNameEn('');
+      setAreaNameAr('');
+      setAreaStatus('');
+      setCityId('');
 
       // Close the add city dialog
       handleAddClose();
     } catch (error) {
-      // Handle error
       console.error(error);
     }
   };
 
   const handleAddClose = () => {
-    // Perform any necessary actions before closing the dialog
+    setAreaNameEn('');
+    setAreaNameAr('');
+    setAreaStatus('');
+    setCityId('');
     onClose();
   };
 
-  const data = [
-    {
-      name: 'ahmed',
-    }
-  ]
-
-  if (data) {
+  if (cities) {
     return (
       <Grid container spacing={6}>
         <Grid item xs={12}>
@@ -88,7 +105,7 @@ const AddCity = ({ open, onClose ,fetchData}) => {
                   pt: theme => [`${theme.spacing(8)} !important`, `${theme.spacing(12.5)} !important`]
                 }}
               >
-                add New City Information
+                add New Area Information
               </DialogTitle>
               <DialogContent
                 sx={{
@@ -102,11 +119,10 @@ const AddCity = ({ open, onClose ,fetchData}) => {
                       <CustomTextField
                         name='en'
                         fullWidth
-                        label='city name in En'
-                        placeholder='enter city name in english'
-                        defaultValue=''
-                        value={cityNameEn}
-                        onChange={(event) => setCityNameEn(event.target.value)}
+                        label='area name in En'
+                        placeholder='enter area name in english'
+                        value={areaNameEn}
+                        onChange={(event) => setAreaNameEn(event.target.value)}
                         required
                       />
                     </Grid>
@@ -114,30 +130,47 @@ const AddCity = ({ open, onClose ,fetchData}) => {
                       <CustomTextField
                         name='ar'
                         fullWidth
-                        label='city name in arabic'
-                        placeholder='enter city name in arabic'
-                        defaultValue=''
-                        value={cityNameAr}
-                        onChange={(event) => setCityNameAr(event.target.value)}
+                        label='area name in arabic'
+                        placeholder='enter area name in arabic'
+                        value={areaNameAr}
+                        onChange={(event) => setAreaNameAr(event.target.value)}
                         required
                       />
                     </Grid>
 
-                    {/* <Grid item xs={12} sm={12}>
+                    <Grid item xs={12} sm={12}>
                       <CustomTextField
-                      name="is_active"
+                        name='city'
                         select
                         fullWidth
-                        label='City Status'
-                        value={cityStatus}
-                        onChange={(event) => setCityStatus(event.target.value)}
+                        label='Select City'
+                        value={cityId}
+                        onChange={(event) => setCityId(event.target.value)}
+                        required
                       >
-                        <MenuItem value = 'true' >Active</MenuItem>
-                        <MenuItem value= 'false' >Inactive</MenuItem>
+                        {cities && cities.map((city) => (
+                          <MenuItem key={city.id} value={city.id}>
+                            {city.name.en}
+                          </MenuItem>
+                        ))}
+                      </CustomTextField>
+                    </Grid>
+                    {/* <Grid item xs={12} sm={12}>
+                      <CustomTextField
+                        name="is_active"
+                        select
+                        fullWidth
+                        label='area Status'
+                        value={areaStatus}
+                        onChange={(event) => setAreaStatus(event.target.value)}
+                      >
+                        <MenuItem value='true' >Active</MenuItem>
+                        <MenuItem value='false' >Inactive</MenuItem>
                       </CustomTextField>
                     </Grid> */}
                   </Grid>
                 </form>
+
               </DialogContent>
               <DialogActions
                 sx={{
@@ -146,8 +179,8 @@ const AddCity = ({ open, onClose ,fetchData}) => {
                   pb: theme => [`${theme.spacing(8)} !important`, `${theme.spacing(12.5)} !important`]
                 }}
               >
-                <Button variant='contained' sx={{ mr: 2 }} onClick={handleAddCity}>
-                  add city
+                <Button variant='contained' sx={{ mr: 2 }} onClick={handleAddArea}>
+                  add Topic
                 </Button>
                 <Button variant='tonal' color='secondary' onClick={handleAddClose}>
                   Cancel
@@ -163,4 +196,4 @@ const AddCity = ({ open, onClose ,fetchData}) => {
   }
 }
 
-export default AddCity
+export default AddTopics

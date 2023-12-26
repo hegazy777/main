@@ -1,3 +1,6 @@
+import React from 'react'
+import { useRouter } from 'next/router'
+
 // ** React Imports
 import { useState, useEffect, forwardRef } from 'react'
 
@@ -21,9 +24,9 @@ import { Button } from '@mui/material'
 
 import axios from 'axios'
 
-import AddCity from './addcity'
-
-import EditCity from './editcity'
+// import EditArea from './editarea'
+// import AddArea from './addarea'
+import { fetchData } from 'src/store/apps/user'
 import baseUrl from 'src/API/apiConfig'
 
 // ** Styled Components
@@ -37,7 +40,7 @@ const LinkStyled = styled(Link)(({ theme }) => ({
 
 const defaultColumns = [
   {
-    flex: 0.1,
+    flex: 0.2,
     field: 'id',
     minWidth: 100,
     headerName: 'ID',
@@ -45,54 +48,56 @@ const defaultColumns = [
   },
 
   {
-    flex: 0.1,
+    flex: 0.2,
     minWidth: 100,
-    field: 'cityAr',
-    headerName: 'city en',
-    renderCell: ({ row }) => <Typography sx={{ color: 'text.secondary' }}>{row.name.en} </Typography>
+    field: 'en',
+    headerName: 'Topics en',
+    renderCell: ({ row }) => <Typography sx={{ color: 'text.secondary' }}>{row.name.en}</Typography>
+  },
+  {
+    flex: 0.2,
+    minWidth: 100,
+    field: 'ar',
+    headerName: 'Topics ar',
+    renderCell: ({ row }) => <Typography sx={{ color: 'text.secondary' }}>{row.name.ar}</Typography>
+  },
+  {
+    flex: 0.2,
+    minWidth: 100,
+    field: 'specialization',
+    headerName: 'specialization',
+    renderCell: ({ row }) => <Typography sx={{ color: 'text.secondary' }}>{row.specialization.name.ar}</Typography>
   },
 
   {
     flex: 0.1,
     minWidth: 100,
-    field: 'cityEn',
-    headerName: 'city ar',
-    renderCell: ({ row }) =>
-    <Typography sx={{ display: 'flex', color: 'text.secondary' }}>
-    {row.name.ar}
-    </Typography>
-  },
-  {
-    flex: 0.1,
-    minWidth: 100,
-    field: 'Number of area',
-    headerName: 'Number of area',
-    renderCell: ({ row }) => <Typography sx={{ color: 'text.secondary' }}> ({row.areas.length}) </Typography>
-  },
-  {
-    flex: 0.15,
-    minWidth: 100,
     field: 'isActive',
     headerName: 'isActive',
     renderCell: ({ row }) => (
-      <Typography sx={{ color: 'text.secondary' }}>{row.is_active === true ? 'active' : 'not active'}</Typography>
+      <Typography sx={{ color: 'text.secondary' }}>{row.is_active === true ? 'true' : 'false'}</Typography>
     )
   }
 ]
 
 /* eslint-enable */
-const City = () => {
+const Topics = () => {
   // ** State
   const [data, setDates] = useState([])
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 })
   const [openAdd, setOpenAdd] = useState(false)
   const [openEdit, setOpenEdit] = useState(false)
-  const [editCityId, setEditCityId] = useState(null)
+  const [editAreaId, setEditAreaId] = useState(null)
 
   // Handle Edit dialog
   const handleAddClickOpen = () => setOpenAdd(true)
   const handleEditClickOpen = () => setOpenEdit(true)
 
+  const router = useRouter()
+
+  // const handleEditClick = () => {
+  //   router.push(`/area/editarea?id=${area.id}`)
+  // }
 
   const columns = [
     ...defaultColumns,
@@ -104,49 +109,46 @@ const City = () => {
       headerName: 'Actions',
       renderCell: ({ row }) => {
         const handleEditClick = id => {
-          setEditCityId(id)
-          handleEditClickOpen();
-        };
+          setEditAreaId(id)
+          setOpenEdit(true)
+        }
 
         return (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Tooltip title='Delete city'>
+            <Tooltip title='Delete area'>
               <IconButton size='small' sx={{ color: 'text.secondary' }}>
                 <Icon icon='tabler:trash' />
               </IconButton>
             </Tooltip>
             <Tooltip title='Edit'>
-              {/* <Link href={`/editcityid/${row.id}`}> */}
-                <IconButton size='small' onClick={() => handleEditClick(row.id)}>
-                  <Icon icon='tabler:edit' />
-                </IconButton>
-              {/* </Link> */}
+              <IconButton size='small' onClick={() => handleEditClick(row.id)}>
+                <Icon icon='tabler:edit' />
+              </IconButton>
             </Tooltip>
           </Box>
-        );
-      },
-    },
-  ];
-
-
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(`${baseUrl}/api/cities`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
-        })
-        const data = response.data
-        setDates(data)
-        console.log(data)
-      } catch (error) {
-        console.error('Error fetching data:', error)
+        )
       }
     }
+  ]
 
-    useEffect(() => {
-      fetchData();
-    }, []);
+  const fetchData = async () => {
+    try {
+      const response = await axios.get(`${baseUrl}/api/topics`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      })
+      const data = response.data
+      setDates(data)
+      console.log(data)
+    } catch (error) {
+      console.error('Error fetching data:', error)
+    }
+  }
+
+  useEffect(() => {
+    fetchData()
+  }, [])
 
   return (
     <Grid container spacing={6}>
@@ -162,7 +164,7 @@ const City = () => {
           <Box sx={{ rowGap: 2, display: 'flex', flexWrap: 'wrap' }}>
             <Button variant='contained' sx={{ '& svg': { mr: 2 } }} onClick={handleAddClickOpen}>
               <Icon fontSize='1.125rem' icon='tabler:plus' />
-              Add New City
+              Add New Topics
             </Button>
           </Box>
         </Box>
@@ -185,10 +187,23 @@ const City = () => {
           />
         </Card>
       </Grid>
-      <AddCity open={openAdd} onClose={() => {setOpenAdd(false)}} fetchData={fetchData} />
-      <EditCity open={openEdit} onClose={() => {setOpenEdit(false)}} cityId={editCityId} fetchData={fetchData} />
+      {/* <AddArea
+        open={openAdd}
+        onClose={() => {
+          setOpenAdd(false)
+        }}
+        fetchData={fetchData}
+      />
+      <EditArea
+        open={openEdit}
+        areaId={editAreaId}
+        onClose={() => {
+          setOpenEdit(false)
+        }}
+        fetchData={fetchData}
+      /> */}
     </Grid>
   )
 }
 
-export default City
+export default Topics

@@ -1,4 +1,7 @@
 // ** React Imports
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+
 // ** MUI Imports
 import Grid from '@mui/material/Grid'
 import Card from '@mui/material/Card'
@@ -8,66 +11,59 @@ import MenuItem from '@mui/material/MenuItem'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
+
+// ** Custom Components
 import CustomTextField from 'src/@core/components/mui/text-field'
-
-import { useState } from 'react';
-import axios from 'axios';
-import { boolean } from 'yup'
-import baseUrl from 'src/API/apiConfig'
-
-// ...
+import baseUrl from 'src/API/apiConfig';
 
 
+const EditSpecializations = ({ open, onClose, SpecializationsId ,fetchData}) => {
+  // ** States
+  const [SpecializationsData, setSpecializationsData] = useState(null);
+
+const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NTY1YTM1NjNhMjE2N2Q3NDUxNTRhZGEiLCJ0eXBlIjoiYWRtaW4iLCJpZCI6MSwiaWF0IjoxNzAyMzY2NDE0fQ.3bOsxc0tjcOThhsmUaUsw6lNIumDWp3H9sC8FjU1bcs';
+  useEffect(() => {
+    const fetchSpecializationsData = async () => {
+      try {
+        const response = await axios.get(`${baseUrl}/api/specializations/${SpecializationsId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
 
 
-const AddCity = ({ open, onClose ,fetchData}) => {
 
-  const [cityNameEn, setCityNameEn] = useState('');
-  const [cityNameAr, setCityNameAr] = useState('');
-  const [cityStatus, setCityStatus] = useState('');
-  const [CityId, setCityId] = useState();
+          }
+        });
+        setSpecializationsData(response.data.data);
 
-  const handleAddCity = async () => {
+        console.log("speci", SpecializationsData);
+
+      } catch (error) {
+        console.error('Error fetching Specializations data:', error);
+      }
+    };
+
+    fetchSpecializationsData();
+  }, [SpecializationsId]);
+
+  const handleEditClose = async () => {
     try {
-      const data = {
-        name: {
-          ar: cityNameAr,
-          en: cityNameEn
-        },
-        is_active: Boolean(cityStatus)
-      };
-
-      const response = await axios.post(`${baseUrl}/api/cities`, data, {
+      await axios.put(`${baseUrl}/api/cities/${SpecializationsId}`, SpecializationsData, {
         headers: {
-          Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NTY1YTM1NjNhMjE2N2Q3NDUxNTRhZGEiLCJ0eXBlIjoiYWRtaW4iLCJpZCI6MSwiaWF0IjoxNzAyMzY2NDE0fQ.3bOsxc0tjcOThhsmUaUsw6lNIumDWp3H9sC8FjU1bcs"
+          Authorization: `Bearer ${token}`
         }
       });
-
-      // Handle the response as needed
-      console.log(response.data);
-
-      fetchData();
-
-      // Close the add city dialog
-      handleAddClose();
+      fetchData()
+      onClose();
     } catch (error) {
-      // Handle error
-      console.error(error);
+      console.error('Error updating Specializations:', error);
     }
   };
 
-  const handleAddClose = () => {
-    // Perform any necessary actions before closing the dialog
-    onClose();
-  };
 
-  const data = [
-    {
-      name: 'ahmed',
-    }
-  ]
 
-  if (data) {
+  if (SpecializationsData) {
+    const { name, areas, is_active } = SpecializationsData;
+
     return (
       <Grid container spacing={6}>
         <Grid item xs={12}>
@@ -88,7 +84,7 @@ const AddCity = ({ open, onClose ,fetchData}) => {
                   pt: theme => [`${theme.spacing(8)} !important`, `${theme.spacing(12.5)} !important`]
                 }}
               >
-                add New City Information
+                Edit Specializations Information
               </DialogTitle>
               <DialogContent
                 sx={{
@@ -100,42 +96,32 @@ const AddCity = ({ open, onClose ,fetchData}) => {
                   <Grid container spacing={6}>
                     <Grid item xs={12} sm={6}>
                       <CustomTextField
-                        name='en'
                         fullWidth
-                        label='city name in En'
-                        placeholder='enter city name in english'
-                        defaultValue=''
-                        value={cityNameEn}
-                        onChange={(event) => setCityNameEn(event.target.value)}
-                        required
+                        label='Specializations Name (English)'
+                        value={name.en}
+                        onChange={(e) => setSpecializationsData({  name: { ...name, en: e.target.value } })}
                       />
                     </Grid>
                     <Grid item xs={12} sm={6}>
                       <CustomTextField
-                        name='ar'
                         fullWidth
-                        label='city name in arabic'
-                        placeholder='enter city name in arabic'
-                        defaultValue=''
-                        value={cityNameAr}
-                        onChange={(event) => setCityNameAr(event.target.value)}
-                        required
+                        label='Specializations Name (Arabic)'
+                        value={name.ar}
+                        onChange={(e) => setSpecializationsData({ name: { ...name, ar: e.target.value } })}
                       />
                     </Grid>
-
-                    {/* <Grid item xs={12} sm={12}>
+                    <Grid item xs={12} sm={12}>
                       <CustomTextField
-                      name="is_active"
                         select
                         fullWidth
-                        label='City Status'
-                        value={cityStatus}
-                        onChange={(event) => setCityStatus(event.target.value)}
+                        label='Specializations Status'
+                        value={is_active ? 'active' : 'inactive'}
+                        onChange={(e) => setSpecializationsData({  is_active: e.target.value === 'active' })}
                       >
-                        <MenuItem value = 'true' >Active</MenuItem>
-                        <MenuItem value= 'false' >Inactive</MenuItem>
+                        <MenuItem value='active'>Active</MenuItem>
+                        <MenuItem value='inactive'>Inactive</MenuItem>
                       </CustomTextField>
-                    </Grid> */}
+                    </Grid>
                   </Grid>
                 </form>
               </DialogContent>
@@ -146,10 +132,10 @@ const AddCity = ({ open, onClose ,fetchData}) => {
                   pb: theme => [`${theme.spacing(8)} !important`, `${theme.spacing(12.5)} !important`]
                 }}
               >
-                <Button variant='contained' sx={{ mr: 2 }} onClick={handleAddCity}>
-                  add city
+                <Button variant='contained' sx={{ mr: 2 }} onClick={handleEditClose}>
+                  Edit Specializations
                 </Button>
-                <Button variant='tonal' color='secondary' onClick={handleAddClose}>
+                <Button variant='tonal' color='secondary' onClick={handleEditClose}>
                   Cancel
                 </Button>
               </DialogActions>
@@ -157,10 +143,10 @@ const AddCity = ({ open, onClose ,fetchData}) => {
           </Card>
         </Grid>
       </Grid>
-    )
+    );
   } else {
-    return null
+    return null;
   }
-}
+};
 
-export default AddCity
+export default EditSpecializations

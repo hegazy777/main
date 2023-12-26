@@ -13,31 +13,30 @@ import CustomTextField from 'src/@core/components/mui/text-field'
 import { useState } from 'react';
 import axios from 'axios';
 import { boolean } from 'yup'
-import baseUrl from 'src/API/apiConfig'
 
 // ...
 
 
 
 
-const AddCity = ({ open, onClose ,fetchData}) => {
+const AddSpecializations = ({ open, onClose ,fetchData}) => {
 
-  const [cityNameEn, setCityNameEn] = useState('');
-  const [cityNameAr, setCityNameAr] = useState('');
-  const [cityStatus, setCityStatus] = useState('');
-  const [CityId, setCityId] = useState();
+  const [SpecializationsNameEn, setSpecializationsNameEn] = useState('');
+  const [SpecializationsNameAr, setSpecializationsNameAr] = useState('');
+  const [SpecializationsStatus, setSpecializationsStatus] = useState('');
+  const [SpecializationsId, setSpecializationsId] = useState();
 
-  const handleAddCity = async () => {
+  const handleAddSpecializations = async () => {
     try {
       const data = {
         name: {
-          ar: cityNameAr,
-          en: cityNameEn
+          ar: SpecializationsNameAr,
+          en: SpecializationsNameEn
         },
-        is_active: Boolean(cityStatus)
+        is_active: Boolean(SpecializationsStatus)
       };
 
-      const response = await axios.post(`${baseUrl}/api/cities`, data, {
+      const response = await axios.post(`${baseUrl}/api/specializations`, data, {
         headers: {
           Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NTY1YTM1NjNhMjE2N2Q3NDUxNTRhZGEiLCJ0eXBlIjoiYWRtaW4iLCJpZCI6MSwiaWF0IjoxNzAyMzY2NDE0fQ.3bOsxc0tjcOThhsmUaUsw6lNIumDWp3H9sC8FjU1bcs"
         }
@@ -48,7 +47,7 @@ const AddCity = ({ open, onClose ,fetchData}) => {
 
       fetchData();
 
-      // Close the add city dialog
+      // Close the add Specializations dialog
       handleAddClose();
     } catch (error) {
       // Handle error
@@ -88,7 +87,7 @@ const AddCity = ({ open, onClose ,fetchData}) => {
                   pt: theme => [`${theme.spacing(8)} !important`, `${theme.spacing(12.5)} !important`]
                 }}
               >
-                add New City Information
+                add New Specializations Information
               </DialogTitle>
               <DialogContent
                 sx={{
@@ -102,11 +101,11 @@ const AddCity = ({ open, onClose ,fetchData}) => {
                       <CustomTextField
                         name='en'
                         fullWidth
-                        label='city name in En'
-                        placeholder='enter city name in english'
+                        label='Specializations name in En'
+                        placeholder='enter Specializations name in english'
                         defaultValue=''
-                        value={cityNameEn}
-                        onChange={(event) => setCityNameEn(event.target.value)}
+                        value={SpecializationsNameEn}
+                        onChange={(event) => setSpecializationsNameEn(event.target.value)}
                         required
                       />
                     </Grid>
@@ -114,11 +113,11 @@ const AddCity = ({ open, onClose ,fetchData}) => {
                       <CustomTextField
                         name='ar'
                         fullWidth
-                        label='city name in arabic'
-                        placeholder='enter city name in arabic'
+                        label='Specializations name in arabic'
+                        placeholder='enter Specializations name in arabic'
                         defaultValue=''
-                        value={cityNameAr}
-                        onChange={(event) => setCityNameAr(event.target.value)}
+                        value={SpecializationsNameAr}
+                        onChange={(event) => setSpecializationsNameAr(event.target.value)}
                         required
                       />
                     </Grid>
@@ -128,9 +127,9 @@ const AddCity = ({ open, onClose ,fetchData}) => {
                       name="is_active"
                         select
                         fullWidth
-                        label='City Status'
-                        value={cityStatus}
-                        onChange={(event) => setCityStatus(event.target.value)}
+                        label='Specializations Status'
+                        value={SpecializationsStatus}
+                        onChange={(event) => setSpecializationsStatus(event.target.value)}
                       >
                         <MenuItem value = 'true' >Active</MenuItem>
                         <MenuItem value= 'false' >Inactive</MenuItem>
@@ -146,8 +145,8 @@ const AddCity = ({ open, onClose ,fetchData}) => {
                   pb: theme => [`${theme.spacing(8)} !important`, `${theme.spacing(12.5)} !important`]
                 }}
               >
-                <Button variant='contained' sx={{ mr: 2 }} onClick={handleAddCity}>
-                  add city
+                <Button variant='contained' sx={{ mr: 2 }} onClick={handleAddSpecializations}>
+                  add Specializations
                 </Button>
                 <Button variant='tonal' color='secondary' onClick={handleAddClose}>
                   Cancel
@@ -163,4 +162,4 @@ const AddCity = ({ open, onClose ,fetchData}) => {
   }
 }
 
-export default AddCity
+export default AddSpecializations

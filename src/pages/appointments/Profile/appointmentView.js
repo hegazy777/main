@@ -23,6 +23,8 @@ import CustomAvatar from 'src/@core/components/mui/avatar'
 import { useAsync } from 'src/hooks/useAsync'
 import { useRouter } from 'next/router'
 import axios from 'axios'
+import Link from 'next/link'
+import baseUrl from 'src/API/apiConfig'
 
 const data = {
   id: 1,
@@ -39,22 +41,23 @@ const data = {
 
 const roleColors = {
   admin: 'error',
-  rejected: 'error',
+  customer: 'success',
 
   // accepted: 'info',
 
   accepted: 'warning',
   maintainer: 'success',
-  subscriber: 'primary'
-}
-
-const statusColors = {
+  subscriber: 'primary',
   active: 'success',
   pending: 'warning',
   inactive: 'secondary'
 }
 
-
+const statusColors = {
+  true: 'success',
+  pending: 'warning',
+  false: 'secondary'
+}
 
 const UserViewLeft = () => {
 
@@ -65,7 +68,7 @@ const UserViewLeft = () => {
 
   const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NTY1YTM1NjNhMjE2N2Q3NDUxNTRhZGEiLCJ0eXBlIjoiYWRtaW4iLCJpZCI6MSwiaWF0IjoxNzAxNTk1OTc4fQ.m_FHMEoXEAhn6WE3TkroNyZIClCZLz-vuJaA2JMoHqs';
 
-  const { data, loading, execute } = useAsync((appiontd) => axios.get(`https://tqneen-testing-be1-dot-tqneen-406411.ew.r.appspot.com/api/appointments/${appiontd}`, { headers: { Authorization: `Bearer ${token}` } }), { immediate: false })
+  const { data, loading, execute } = useAsync((appiontd) => axios.get(`${baseUrl}/api/appointments/${appiontd}`, { headers: { Authorization: `Bearer ${token}` } }), { immediate: false })
 
   useEffect(() => {
     if (router.query.appiontd) {
@@ -83,62 +86,37 @@ const UserViewLeft = () => {
   if (data) {
     return (
       <Grid container spacing={12}>
-        <Grid item xs={12} lg={6}>
+        <Grid item xs={12} lg={8}>
           <Card>
-            <CardContent sx={{ pt: 13.5, display: 'flex', alignItems: 'center', flexDirection: 'column' }} >
-              {data.customer.avatar ? (
-                <CustomAvatar
-                  src={data.customer.avatar}
-                  variant='rounded'
-                  alt={data.customer.full}
-                  sx={{ width: 100, height: 100, mb: 4 }}
-                />
-              ) : (
-                <CustomAvatar
-                  skin='light'
-                  variant='rounded'
-                  color={data.avatarColor}
-                  sx={{ width: 100, height: 100, mb: 4, fontSize: '3rem' }}
-                >
-                </CustomAvatar>
-              )}
-              <Typography variant='h4' sx={{ mb: 3 }}>
-                {data.customer.full_name}
-              </Typography>
-              <CustomChip
-                rounded
-                skin='light'
-                size='small'
-                label={data.customer.type}
-                color={roleColors[data.role]}
-                sx={{ textTransform: 'capitalize' }}
-              />
-            </CardContent>
-            <Divider sx={{ my: '0 !important', mx: 6 }} />
+            <Typography sx={{ m: 8, fontWeight: 'bold', color: 'text.secondary', textAlign: 'center' }}>Appointment  Details </Typography>
             <CardContent sx={{ pb: 4 }}>
               <Box sx={{ pt: 4 }}>
-                <Box sx={{ display: 'flex', mb: 3 , alignItems:'center'  }}>
-                  <Typography sx={{ mr: 2, fontWeight: 'bold', color: 'text.secondary'  , textAlign:'center'}}>Appointment  Number :</Typography>
-                  <Typography sx={{ color:'text.secondary' }}> {data.id} </Typography>
+                <Box sx={{ display: 'flex', mb: 3, alignItems: 'center' }}>
+                  <Typography sx={{ mr: 2, fontWeight: 'bold', color: 'text.secondary', textAlign: 'center' }}>Appointment  Number :</Typography>
+                  <Typography sx={{ color: 'text.secondary' }}> {data.id} </Typography>
                 </Box>
-                <Box sx={{  mb: 3, mr: 2, fontWeight: 'bold', color: 'text.secondary '}}>
-                  <Typography sx={{ fontWeight: 'bold', color: 'text.secondary '}} color={roleColors[data.status]} >Appointment Status : {data.status}</Typography>
+                <Box sx={{ mb: 3, mr: 2, fontWeight: 'bold', color: 'text.secondary ' }}>
+                  <Typography sx={{ fontWeight: 'bold', color: 'text.secondary ' }} color={roleColors[data.status]} >Appointment Status : {data.status}</Typography>
                 </Box>
                 <Box sx={{ display: 'flex', mb: 3 }}>
-                  <Typography sx={{ mr: 2, fontWeight: 'bold', color: 'text.secondary '}}>Created at:</Typography>
+                  <Typography sx={{ mr: 2, fontWeight: 'bold', color: 'text.secondary ' }}>Created at:</Typography>
                   <Typography sx={{ color: 'text.secondary' }}>{new Date(data.createdAt).toLocaleString()}</Typography>
                 </Box>
                 <Box sx={{ display: 'flex', mb: 3 }}>
-                  <Typography sx={{ mr: 2, fontWeight: 'bold', color: 'text.secondary '}}>Topic:</Typography>
+                  <Typography sx={{ mr: 2, fontWeight: 'bold', color: 'text.secondary ' }}>updated at:</Typography>
+                  <Typography sx={{ color: 'text.secondary' }}>{new Date(data.updatedAt).toLocaleString()}</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', mb: 3 }}>
+                  <Typography sx={{ mr: 2, fontWeight: 'bold', color: 'text.secondary ' }}>Topic:</Typography>
                   <Typography sx={{ color: 'text.secondary' }}>{data.topic.name.en} { }</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', mb: 3 }}>
+                  <Typography sx={{ mr: 2, fontWeight: 'bold', color: 'text.secondary ' }}>specification:</Typography>
+                  <Typography sx={{ color: 'text.secondary' }}>{data.specification.name.en} { }</Typography>
                 </Box>
                 <Box sx={{ display: 'flex', mb: 3 }}>
                   <Typography sx={{ mr: 2, fontWeight: 'bold', color: 'text.secondary ' }}>fees:</Typography>
                   <Typography sx={{ color: 'text.secondary', textTransform: 'capitalize' }}>{data.fees}</Typography>
-                </Box>
-                <Box sx={{ display: 'flex', mb: 3, alignItems: 'center' }}>
-                  <Typography sx={{ mr: 2, fontWeight: 'bold', color: 'text.secondary ' }}>Phone Number: </Typography>
-                    <Typography >{data.customer.phone} </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', mb: 3, alignItems: 'center' }}>
                   <Typography sx={{ mr: 2, fontWeight: 'bold', color: 'text.secondary ' }}>Description: <Typography>{data.description} </Typography></Typography>
@@ -147,12 +125,52 @@ const UserViewLeft = () => {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} lg={6}>
+        <Grid item xs={12} lg={4}>
           <Card>
-            <CardContent sx={{ pt: 13.5, display: 'flex', alignItems: 'center', flexDirection: 'column' }} >
+            <CardContent sx={{ display: 'flex', alignItems: 'center', flexDirection: 'column' }} >
               {data.avatar ? (
                 <CustomAvatar
+                  src={data.customer.avatar}
+                  variant='rounded'
+                  alt={data.customer.full_name}
+                  sx={{ width: 100, height: 100, mb: 4 }}
+                />
+              ) : (
+                <CustomAvatar
+                  skin='light'
+                  component={Link}
+                  variant='rounded'
+                  color={data.avatarColor}
+                  href='#'
+                  sx={{ width: 100, height: 100, mb: 4, fontSize: '3rem' }}
+                >
+                </CustomAvatar>
+              )}
+              <Typography variant='h4' sx={{ mb: 3 }}>
+                {data.customer.full_name}
+              </Typography>
+              <Typography variant='p' sx={{ mb: 3 }}>
+                {data.customer.phone}
+              </Typography>
+              <Typography  sx={{ mb: 3 }} color={data.customer.is_active === true ? 'green' : 'red'}>
+                {data.customer.is_active === true ? "Active" : "Not Active"}
+              </Typography>
+              <CustomChip
+                rounded
+                skin='light'
+                size='small'
+                label={data.customer.type}
+                color={roleColors[data.status]}
+                sx={{ textTransform: 'capitalize' }}
+              />
+            </CardContent>
+            <Divider sx={{ my: '2 !important', mx: 12 }} />
+            <CardContent sx={{ display: 'flex', alignItems: 'center', flexDirection: 'column' }} >
+              {data.lawyer.avatar ? (
+                <CustomAvatar
+                  component={Link}
                   src={data.lawyer.avatar}
+                  href={`/Lawyer/Profile/LawyerProfile/${data.lawyer.id}`}
                   variant='rounded'
                   alt={data.lawyer.full_name}
                   sx={{ width: 100, height: 100, mb: 4 }}
@@ -161,6 +179,8 @@ const UserViewLeft = () => {
                 <CustomAvatar
                   skin='light'
                   variant='rounded'
+                  component={Link}
+                  href={`/Lawyer/Profile/LawyerProfile/${data.lawyer.id}`}
                   color={data.avatarColor}
                   sx={{ width: 100, height: 100, mb: 4, fontSize: '3rem' }}
                 >
@@ -168,6 +188,12 @@ const UserViewLeft = () => {
               )}
               <Typography variant='h4' sx={{ mb: 3 }}>
                 {data.lawyer.full_name}
+              </Typography>
+              <Typography variant='p' sx={{ mb: 3 }}>
+                {data.lawyer.phone}
+              </Typography>
+              <Typography  sx={{ mb: 3 }} color={data.lawyer.is_active === true ? 'green' : 'red'}>
+                {data.lawyer.is_active === true ? "Active" : "Not Active"}
               </Typography>
               <CustomChip
                 rounded
@@ -177,10 +203,6 @@ const UserViewLeft = () => {
                 color={roleColors[data.status]}
                 sx={{ textTransform: 'capitalize' }}
               />
-            </CardContent>
-            {/* customer */}
-            <CardContent sx={{ pt: theme => `${theme.spacing(2)} !important` }}>
-
             </CardContent>
           </Card>
         </Grid>

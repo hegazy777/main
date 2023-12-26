@@ -47,13 +47,12 @@ const roleColors = {
 }
 
 const statusColors = {
-  active: 'success',
+  true: 'success',
   pending: 'warning',
-  notactive: 'secondary'
+  false: 'secondary'
 }
 
-
-const LawyerView = () => {
+const CustomerView = () => {
   // ** States
   const router = useRouter()
 
@@ -80,22 +79,20 @@ const LawyerView = () => {
 
   })
 
-  const { data, loading, execute } = useAsync((lawyerId) => axios.get(`${baseUrl}/api/customer/lawyers/${lawyerId}`, { headers: { Authorization: `Bearer ${token}` } }), { immediate: false })
+  const { data, loading, execute } = useAsync((customerId) => axios.get(`${baseUrl}/api/customer/customers/${customerId}`, { headers: { Authorization: `Bearer ${token}` } }), { immediate: false })
 
   const { data: cities } = useAsync(() => axios.get(`${baseUrl}/api/cities`, { headers: { Authorization: `Bearer ${token}` } }), { immediate: true })
 
-  const { data: selectedCity, execute: fetchAreas } = useAsync((cityId) => axios.get(`${baseUrl}/cities/${cityId}`, { headers: { Authorization: `Bearer ${token}` } }), { immediate: false })
+  const { data: selectedCity, execute: fetchAreas } = useAsync((cityId) => axios.get(`${baseUrl}/api/cities/${cityId}`, { headers: { Authorization: `Bearer ${token}` } }), { immediate: false })
 
-  const { data: specializations } = useAsync(() => axios.get(`${baseUrl}/api/specializations`, { headers: { Authorization: `Bearer ${token}` } }), { immediate: true })
-
-  const { data: updatedlawyer, loading: isUpdatedLawyerLoading, execute: updateLawyer } = useAsync(({ lawyerId, lawyerData }) => {
+  const { data: updatedlawyer, loading: isUpdatedLawyerLoading, execute: updateLawyer } = useAsync(({ customerId, lawyerData }) => {
     const { email, ...restOfData } = lawyerData;
 
 
     return axios.put(
-      `${baseUrl}/api/admin/users/${lawyerId}`,
+      `${baseUrl}/api/admin/users/${customerId}`,
       {
-        // email: email === null || email == "" ? " " : email,
+        email: email === null || email == "" ? " " : email,
         ...restOfData
       },
       {
@@ -105,8 +102,8 @@ const LawyerView = () => {
   }, { immediate: false });
 
   useEffect(() => {
-    if (router.query.lawyerId) {
-      execute(router.query.lawyerId)
+    if (router.query.customerId) {
+      execute(router.query.customerId)
     }
   }, [router]);
 
@@ -118,15 +115,15 @@ const LawyerView = () => {
 
   const onSubmit = async (data) => {
 
-    if (router.query.lawyerId) {
-      updateLawyer({ lawyerId: router.query.lawyerId, lawyerData: data })
+    if (router.query.customerId) {
+      updateLawyer({ customerId: router.query.customerId, lawyerData: data })
       handleEditClose()
     }
 
   }
   useEffect(() => {
-    if (router.query.lawyerId) {
-      execute(router.query.lawyerId)
+    if (router.query.customerId) {
+      execute(router.query.customerId)
     }
   }, [updatedlawyer]);
 
@@ -137,7 +134,7 @@ const LawyerView = () => {
       setValue("city", data?.city?.id)
       console.log(data?.area.city?.name?.en);
       setValue("area", data?.area?.id)
-      setAreas(data?.area?.name.en)
+      setAreas(data?.area?.name?.en)
       setValue("is_active", data?.is_active)
 
     }
@@ -157,6 +154,7 @@ const LawyerView = () => {
       setAreas([]);
     }
   };
+
   console.log(data?.city?.name?.en);
   console.log("error", errors)
   if (data) {
@@ -164,12 +162,12 @@ const LawyerView = () => {
       <Grid container spacing={12}>
         <Grid item xs={12} lg={6} >
           <Card>
-            <CardContent sx={{ pt: 13.5, display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
+          <CardContent sx={{ pt: 13.5, display: 'flex', alignItems: 'center', flexDirection: 'column' }} >
               {data.avatar ? (
                 <CustomAvatar
                   src={data.avatar}
                   variant='rounded'
-                  alt={data.fullName}
+                  alt={data.full_name}
                   sx={{ width: 100, height: 100, mb: 4 }}
                 />
               ) : (
@@ -179,69 +177,47 @@ const LawyerView = () => {
                   color={data.avatarColor}
                   sx={{ width: 100, height: 100, mb: 4, fontSize: '3rem' }}
                 >
-                  {data.fullName}
+                  {data.full_name}
                 </CustomAvatar>
               )}
               <Typography variant='h4' sx={{ mb: 3 }}>
                 {data.full_name}
               </Typography>
-              <Box sx={{ display: 'flex', textAlign: 'center' }}>
-                <Typography sx={{ mr: 2, fontWeight: 500, color: 'text.secondary', textAlign: 'center' }}>Status:</Typography>
-                <CustomChip
-                  rounded
-                  skin='light'
-                  size='small'
-                  label={data.is_active === true ? "active" : "not active"}
-                  color={statusColors[data.is_active]}
-                  sx={{
-                    textTransform: 'capitalize'
-                  }}
-                />
-              </Box>
+              <CustomChip
+                rounded
+                skin='light'
+                size='small'
+                label={data.is_active ? "Active" : "Not Active"}
+                color={statusColors[data.is_active ? "active" : "notactive"]}
+
+                sx={{ textTransform: 'capitalize' }}
+              />
             </CardContent>
             <Divider sx={{ my: '0 !important', mx: 6 }} />
-            <CardContent sx={{ pb: 4 }}>
-              <Typography variant='body2' sx={{ color: 'text.disabled', textAlign: 'center', textTransform: 'uppercase' }}>
-                Lawyer information  Details
+            <CardContent sx={{ pb: 4, alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }} >
+              <Typography variant='body2' sx={{ color: 'text.disabled', textTransform: 'uppercase' }}>
+                Customer More  information
               </Typography>
               <Box sx={{ pt: 4 }}>
                 <Box sx={{ display: 'flex', mb: 3 }}>
-                  <Typography sx={{ mr: 2, fontWeight: 500, color: 'text.secondary' }}>Email:</Typography>
-                  <Typography sx={{ color: 'text.secondary' }}>{data.email}</Typography>
+                  <Typography sx={{ mr: 2, fontWeight: 500, color: 'text.secondary' }}>Username:</Typography>
+                  <Typography sx={{ color: 'text.secondary' }}>{data.first_name}</Typography>
                 </Box>
                 <Box sx={{ display: 'flex', mb: 3 }}>
-                  <Typography sx={{ mr: 2, fontWeight: 500, color: 'text.secondary' }}>Fees :</Typography>
-                  <Typography sx={{ color: 'text.secondary' }}> {data.fees}</Typography>
+                  <Typography sx={{ mr: 2, fontWeight: 500, color: 'text.secondary' }}>phone:</Typography>
+                  <Typography sx={{ color: 'text.secondary' }}>{data.phone}</Typography>
                 </Box>
                 <Box sx={{ display: 'flex', mb: 3 }}>
-                  <Typography sx={{ mr: 2, fontWeight: 500, color: 'text.secondary' }}>Phone:</Typography>
-                  <Typography sx={{ color: 'text.secondary' }}> {data.phone}</Typography>
+                  <Typography sx={{ mr: 2, fontWeight: 500, color: 'text.secondary' }}>City / Area:</Typography>
+                  <Typography sx={{ color: 'text.secondary' }}>{data.area?.name?.en} / {data.area?.city?.name?.en}</Typography>
                 </Box>
                 <Box sx={{ display: 'flex', mb: 3 }}>
-                  <Typography sx={{ mr: 2, fontWeight: 500, color: 'text.secondary' }}>Addres:</Typography>
+                  <Typography sx={{ mr: 2, fontWeight: 500, color: 'text.secondary' }}>Customer Address:</Typography>
                   <Typography sx={{ color: 'text.secondary' }}>{data.address}</Typography>
                 </Box>
-                <Box sx={{ display: 'flex', mb: 3 }}>
-                  <Typography sx={{ mr: 2, fontWeight: 500, color: 'text.secondary' }}>City / Area  : </Typography>
-                  <Typography sx={{ color: 'text.secondary' }}>{data?.area.city?.name?.en}  /  </Typography>
-                  <Typography sx={{ color: 'text.secondary' }}> {data?.area?.name?.en} </Typography>
-                </Box>
               </Box>
             </CardContent>
-            <CardContent>
-              <Typography sx={{ color: 'text.secondary' }}> Specialization </Typography>
-              <Box sx={{ mt: 2.5, mb: 4 }}>
-                {data.specializations.map((specializations) => (
-                  <Box
-                    key={specializations.id}
-                    sx={{ display: 'flex', mb: 2, alignItems: 'center', '& svg': { mr: 2, color: 'text.secondary' } }}
-                  >
-                    <Icon icon='tabler:point' fontSize='1.125rem' />
-                    <Typography sx={{ color: 'text.secondary' }}>{specializations.name.en}</Typography>
-                  </Box>
-                ))}
-              </Box>
-            </CardContent>
+
             <CardActions sx={{ display: 'flex', justifyContent: 'center' }}>
               <Button variant='contained' sx={{ mr: 2 }} onClick={handleEditClickOpen}>
                 Edit
@@ -263,7 +239,7 @@ const LawyerView = () => {
                   pt: theme => [`${theme.spacing(8)} !important`, `${theme.spacing(12.5)} !important`]
                 }}
               >
-                Edit Lawyer Information
+                Edit customer Information
               </DialogTitle>
               <DialogContent
                 sx={{
@@ -272,7 +248,7 @@ const LawyerView = () => {
                 }}
               >
                 <DialogContentText variant='body2' id='user-view-edit-description' sx={{ textAlign: 'center', mb: 7 }}>
-                  Updating Lawyer details will receive a privacy audit.
+                  Updating customer details will receive a privacy audit.
                 </DialogContentText>
                 <form onSubmit={handleSubmit(onSubmit)}>
                   <Controller
@@ -417,140 +393,11 @@ const LawyerView = () => {
                     )}
                     rules={{ required: true }}
                   />
-                  <Controller
-                    name="specializations"
-                    control={control}
-                    render={({ field: { value, ...restFieldOptions } }) => (
-                      <TextField
-                        select
-                        value={value || []}
-                        sx={{ mb: 4 }}
-                        fullWidth
-                        label="specializations"
-                        SelectProps={{ multiple: true }}
-                        {...restFieldOptions}
-                      >
-                        <MenuItem value="" disabled>
-                          Select an specializations
-                        </MenuItem>
-                        {specializations.data.map((specialization) => (
-                          <MenuItem key={specialization.id} value={specialization.id} selected>
-                            {specialization.name.en}
-                          </MenuItem>
-                        ))}
-                      </TextField>
-                    )}
-                    rules={{ required: true }}
-                  />
 
-                  <Controller
-                    name='gender'
-                    control={control}
-                    rules={{ required: true }}
-                    defaultValue={data?.gender?.toLowerCase()}
-                    render={({ field: { value, onChange, ...rest } }) => (
-                      <CustomTextField
-                        select
-                        fullWidth
-                        sx={{ mb: 4 }}
-                        label='gender'
-                        id='validation-gender-select'
-                        error={Boolean(errors.gender)}
-                        aria-describedby='validation-gender-select'
-                        {...(errors.gender && { helperText: errors.gender.message })}
-                        defaultValue={data?.gender?.toLowerCase()}
-                        SelectProps={{ value: value, onChange: e => onChange(e) }}
-                        {...rest}
-                      >
-                        <MenuItem value=''>Select</MenuItem>
-                        <MenuItem value='male'>Male</MenuItem>
-                        <MenuItem value='female'>Fmale</MenuItem>
-                      </CustomTextField>
-                    )}
-                  />
-                  <Controller
-                    name='numOfExperience'
-                    control={control}
-                    rules={{
-                      required: true, pattern: {
-                        value: /^[0-9]+$/,
-                        message: 'Please enter a number',
-                      },
-                    }}
-                    defaultValue={data?.numOfExperience}
-                    render={({ field: { value, onChange } }) => (
-                      <CustomTextField
-                        fullWidth
-                        value={value}
-                        sx={{ mb: 4 }}
-                        label='numOfExperience'
-                        onChange={onChange}
-                        placeholder=''
-                        error={Boolean(errors.numOfExperience)}
-                        {...(errors.numOfExperience && { helperText: errors.numOfExperience.message })}
-                      />
-                    )}
-                  />
-                  <Controller
-                    name='password'
-                    control={control}
-                    rules={{ required: false }}
-                    render={({ field: { value, onChange } }) => (
-                      <TextField
-                        fullWidth
-                        value={value}
-                        sx={{ mb: 4 }}
-                        label='password'
-                        onChange={onChange}
-                        placeholder=''
-                        error={Boolean(errors.password)}
-                        {...(errors.password && { helperText: errors.password.message })}
-                      />
 
-                    )}
-                  />
-                  <Controller
-                    name='fees'
-                    control={control}
-                    rules={{ required: true }}
-                    defaultValue={data?.fees}
 
-                    render={({ field: { value, onChange } }) => (
-                      <TextField
-                        fullWidth
-                        value={value}
-                        sx={{ mb: 4 }}
-                        label='fees'
-                        onChange={onChange}
-                        placeholder=''
-                        error={Boolean(errors.fees)}
-                        {...(errors.fees && { helperText: errors.fees.message })}
-                      />
 
-                    )}
-                  />
-                  {/* <Controller
-                    name='status'
-                    control={control}
-                    rules={{ required: true }}
-                    render={({ field: { value, onChange } }) => (
-                      <CustomTextField
-                        select
-                        fullWidth
-                        sx={{ mb: 4 }}
-                        label='status'
-                        id='validation-status-select'
-                        error={Boolean(errors.status)}
-                        aria-describedby='validation-status-select'
-                        {...(errors.status && { helperText: errors.status.message })}
-                        SelectProps={{ value: value, onChange: e => onChange(e) }}
-                      >
-                        <MenuItem value=''>status (online/offline) </MenuItem>
-                        <MenuItem value='active'>online</MenuItem>
-                        <MenuItem value='not active'>offline</MenuItem>
-                      </CustomTextField>
-                    )}
-                  /> */}
+
                   <Controller
                     name='is_active'
                     control={control}
@@ -587,22 +434,7 @@ const LawyerView = () => {
           </Card>
         </Grid>
         {/* i,mage */}
-        <Grid item xs={12} lg={6} >
-          <Card>
-            <CardContent ssx={{ pt: 13.5, display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
-              <Typography variant='body2' sx={{ color: 'text.disabled', fontSize: 18, mp: 8, textAlign: 'center', alignItems: 'center', textTransform: 'uppercase' }}>
-                Personal Card  information Image
-              </Typography>
-              <Divider sx={{ my: 5, mx: 6 }} />
-              <CardMedia sx={{ height: '10.5625rem', pb: 4 }} image='/images/cards/glass-house.png' />
-              <Divider sx={{ my: 5, mx: 6 }} />
-              <CardMedia sx={{ height: '10.5625rem', pb: 4 }} image='/images/cards/glass-house.png' />
-              <Divider sx={{ my: 5, mx: 6 }} />
-              <CardMedia sx={{ height: '10.5625rem', pb: 4 }} image='/images/cards/glass-house.png' />
 
-            </CardContent>
-          </Card>
-        </Grid>
       </Grid>
     )
   } else {
@@ -610,4 +442,4 @@ const LawyerView = () => {
   }
 }
 
-export default LawyerView
+export default CustomerView

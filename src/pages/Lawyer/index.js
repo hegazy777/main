@@ -11,10 +11,7 @@ import Menu from '@mui/material/Menu'
 import Grid from '@mui/material/Grid'
 import Divider from '@mui/material/Divider'
 import MenuItem from '@mui/material/MenuItem'
-import IconButton from '@mui/material/IconButton'
 import Typography from '@mui/material/Typography'
-import CardHeader from '@mui/material/CardHeader'
-import CardContent from '@mui/material/CardContent'
 import { DataGrid } from '@mui/x-data-grid'
 
 // ** Icon Imports
@@ -26,7 +23,6 @@ import { useDispatch, useSelector } from 'react-redux'
 // ** Custom Components Imports
 import CustomChip from 'src/@core/components/mui/chip'
 import CustomAvatar from 'src/@core/components/mui/avatar'
-import CustomTextField from 'src/@core/components/mui/text-field'
 import CardStatsHorizontalWithDetails from 'src/@core/components/card-statistics/card-stats-horizontal-with-details'
 
 // ** Utils Import
@@ -43,6 +39,8 @@ import TableHeader from 'src/views/apps/user/list/TableHeader'
 import SidebarLawyer from './CreateLawyer'
 import { useAsync } from 'src/hooks/useAsync'
 import { useCallback } from 'react'
+import baseUrl from 'src/API/apiConfig'
+
 
 // ** renders client column
 const userStatusObj = {
@@ -94,13 +92,13 @@ const RowOptions = ({ id }) => {
   return (
     <>
       <MenuItem
-          component={Link}
-          sx={{ '& svg': { mr: 2 } }}
-          href={`/Lawyer/Profile/LawyerProfile/${id}`}
-          onClick={handleRowOptionsClose}
-        >
-          <Icon icon='tabler:eye' fontSize={20} />
-        </MenuItem>
+        component={Link}
+        sx={{ '& svg': { mr: 2 } }}
+        href={`/Lawyer/Profile/LawyerProfile/${id}`}
+        onClick={handleRowOptionsClose}
+      >
+        <Icon icon='tabler:eye' fontSize={20} />
+      </MenuItem>
     </>
   )
 }
@@ -126,7 +124,7 @@ const ListAllData = ({ apiData }) => {
   }, [])
 
 
-  const { data, execute: fetchLawyerData, status, loading } = useAsync(() => axios.get('https://tqneen-testing-be1-dot-tqneen-406411.ew.r.appspot.com//api/admin/users?type=lawyer', {
+  const { data, execute: fetchLawyerData, status, loading } = useAsync(() => axios.get(`${baseUrl}/api/admin/users?type=lawyer`, {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`
     }
@@ -244,7 +242,7 @@ const ListAllData = ({ apiData }) => {
             rounded
             skin='light'
             size='small'
-            label={row.is_active===turu ? "activ" : "not active"}
+            label={row.is_active === turu ? "active" : "not active"}
             color={userStatusObj[row.is_active]}
             sx={{ textTransform: 'capitalize' }}
           />
@@ -280,27 +278,6 @@ const ListAllData = ({ apiData }) => {
       </Grid>
       <Grid item xs={12}>
         <Card>
-          {/* <CardHeader title='Search Filters' /> */}
-          {/* <CardContent>
-            <Grid container spacing={6}>
-              <Grid item sm={4} xs={12}>
-                <CustomTextField
-                  select
-                  fullWidth
-                  defaultValue='Select Status'
-                  SelectProps={{
-                    value: status,
-                    displayEmpty: true,
-                    onChange: e => handleStatusChange(e)
-                  }}
-                >
-                  <MenuItem value=''>Select Status</MenuItem>
-                  <MenuItem value='active'>Active</MenuItem>
-                  <MenuItem value='inactive'>Inactive</MenuItem>
-                </CustomTextField>
-              </Grid>
-            </Grid>
-          </CardContent> */}
           <Divider sx={{ m: '0 !important' }} />
           <TableHeader value={value} handleFilter={handleFilter} toggle={toggleSidebarLawyer} />
           <DataGrid

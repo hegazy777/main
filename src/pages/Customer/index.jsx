@@ -42,13 +42,14 @@ import axios from 'axios'
 import TableHeader from './TableHeader'
 import AddCustomer from 'src/pages/Customer/AddCustomer'
 import { Tooltip } from 'chart.js'
+import baseUrl from 'src/API/apiConfig'
 
 // ** renders client column
 
 const userStatusObj = {
   true: 'success',
   pending: 'warning',
-  fasle: 'secondary'
+  false: 'secondary'
 }
 
 // ** renders client column
@@ -117,7 +118,7 @@ const RowOptions = ({ id }) => {
         <MenuItem
           component={Link}
           sx={{ '& svg': { mr: 2 } }}
-          href='/apps/user/view/account'
+          href='#'
           onClick={handleRowOptionsClose}
         >
           <Icon icon='tabler:eye' fontSize={20} />
@@ -227,7 +228,7 @@ const columns = [
   {
     flex: 0.1,
     minWidth: 140,
-    sortable: false,
+    sortable: true,
     field: 'actions',
     headerName: 'Actions',
     renderCell: ({ row }) => (
@@ -238,7 +239,7 @@ const columns = [
             component={Link}
             sx={{ color: 'text.secondary' }}
 
-            href={`/Customer`}
+            href={`/Customer/Profile/${row.id}`}
           >
             <Icon icon='tabler:eye' />
           </IconButton>
@@ -301,7 +302,7 @@ const Customer = ({ apiData }) => {
         }
 
         const response = await axios.get(
-          'https://tqneen-testing-be1-dot-tqneen-406411.ew.r.appspot.com//api/admin/users?type=customer',
+          `${baseUrl}/api/admin/users?type=customer`,
           { headers }
         )
 

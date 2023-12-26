@@ -14,6 +14,7 @@ import DialogActions from '@mui/material/DialogActions'
 
 // ** Custom Components
 import CustomTextField from 'src/@core/components/mui/text-field'
+import baseUrl from 'src/API/apiConfig';
 
 
 const EditCity = ({ open, onClose, cityId ,fetchData}) => {
@@ -24,7 +25,7 @@ const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NTY1YTM1NjNh
   useEffect(() => {
     const fetchCityData = async () => {
       try {
-        const response = await axios.get(`https://tqneen-testing-be1-dot-tqneen-406411.ew.r.appspot.com//api/cities/${cityId}`, {
+        const response = await axios.get(`https://tqneen-rlyoguxn5a-uc.a.run.app/api/cities/${cityId}`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -40,7 +41,7 @@ const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NTY1YTM1NjNh
 
   const handleEditClose = async () => {
     try {
-      await axios.put(`https://tqneen-testing-be1-dot-tqneen-406411.ew.r.appspot.com/api/cities/${cityId}`, cityData, {
+      await axios.put(`${baseUrl}/api/cities/${cityId}`, cityData, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -91,16 +92,16 @@ const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NTY1YTM1NjNh
                       <CustomTextField
                         fullWidth
                         label='City Name (English)'
-                        defaultValue={name.en}
-                        onChange={(e) => setCityData({ ...cityData, name: { ...name, en: e.target.value } })}
+                        value={name.en}
+                        onChange={(e) => setCityData({  name: { ...name, en: e.target.value } })}
                       />
                     </Grid>
                     <Grid item xs={12} sm={6}>
                       <CustomTextField
                         fullWidth
                         label='City Name (Arabic)'
-                        defaultValue={name.ar}
-                        onChange={(e) => setCityData({ ...cityData, name: { ...name, ar: e.target.value } })}
+                        value={name.ar}
+                        onChange={(e) => setCityData({ name: { ...name, ar: e.target.value } })}
                       />
                     </Grid>
                     <Grid item xs={12} sm={12}>
@@ -108,8 +109,8 @@ const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NTY1YTM1NjNh
                         select
                         fullWidth
                         label='City Status'
-                        defaultValue={is_active ? 'active' : 'inactive'}
-                        onChange={(e) => setCityData({ ...cityData, is_active: e.target.value === 'active' })}
+                        value={is_active ? 'active' : 'inactive'}
+                        onChange={(e) => setCityData({  is_active: e.target.value === 'active' })}
                       >
                         <MenuItem value='active'>Active</MenuItem>
                         <MenuItem value='inactive'>Inactive</MenuItem>

@@ -35,12 +35,12 @@ import { getInitials } from 'src/@core/utils/get-initials'
 // ** Custom Components Imports
 import CustomChip from 'src/@core/components/mui/chip'
 import CustomAvatar from 'src/@core/components/mui/avatar'
-import OptionsMenu from 'src/@core/components/option-menu'
 import TableHeader from 'src/views/apps/invoice/list/TableHeader'
 import CustomTextField from 'src/@core/components/mui/text-field'
 
 // ** Styled Components
 import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
+import baseUrl from 'src/API/apiConfig'
 
 // ** Styled component for the link in the dataTable
 const LinkStyled = styled(Link)(({ theme }) => ({
@@ -143,7 +143,7 @@ const defaultColumns = [
     headerName: 'status',
     renderCell: ({ row }) => {
       return row.status !== 0 ? (
-        <Typography color='' >{row.status}</Typography>
+        <Typography color=''>{row.status}</Typography>
       ) : (
         <CustomChip rounded size='small' skin='light' color='success' label='not active' />
       )
@@ -170,11 +170,11 @@ const AppointmentList = () => {
   const [endDateRange, setEndDateRange] = useState(null)
   const [selectedRows, setSelectedRows] = useState([])
   const [startDateRange, setStartDateRange] = useState(null)
-  const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 })
+  const [paginationModel, setPaginationModel] = useState({ page: 1, limit: 15, total: 0 })
   const [error, setError] = useState(null)
   const [data, setData] = useState([])
-
-  console.log('this PAGE data', data.docs)
+  const [count, setCount] = useState(0)
+  const [page, setPage] = useState(0)
 
   // ** Hooks
   const dispatch = useDispatch()
@@ -220,7 +220,6 @@ const AppointmentList = () => {
               size='small'
               component={Link}
               sx={{ color: 'text.secondary' }}
-
               href={`/appointments/Profile/${row.id}`}
             >
               <Icon icon='tabler:eye' />
@@ -235,20 +234,26 @@ const AppointmentList = () => {
     const fetchData = async () => {
       try {
         const token =
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NTY1YTM1NjNhMjE2N2Q3NDUxNTRhZGEiLCJ0eXBlIjoiYWRtaW4iLCJpZCI6MSwiaWF0IjoxNzAxNTk1OTc4fQ.m_FHMEoXEAhn6WE3TkroNyZIClCZLz-vuJaA2JMoHqs'
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NTY1YTM1NjNhMjE2N2Q3NDUxNTRhZGEiLCJ0eXBlIjoiYWRtaW4iLCJpZCI6MSwiaWF0IjoxNzAyMzY2NDE0fQ.3bOsxc0tjcOThhsmUaUsw6lNIumDWp3H9sC8FjU1bcs'
 
         const headers = {
           Authorization: `Bearer ${token}`
         }
 
         const response = await axios.get(
-          'https://tqneen-testing-be1-dot-tqneen-406411.ew.r.appspot.com/api/appointments',
-          { headers }
+          `${baseUrl}/api/appointments`,
+          {
+            headers,
+            params: {
+              page: paginationModel.page, // Use the correct page parameter
+              limit: paginationModel.limit
+            }
+          }
         )
 
-        console.log('Appointment', response.data)
-
+        setCount(response.data.totalDocs)
         setData(response.data.docs)
+        setPage(response.data.totalPages)
       } catch (error) {
         console.error(error)
         setError(error.message)
@@ -256,8 +261,20 @@ const AppointmentList = () => {
     }
 
     fetchData()
-  }, [])
+  }, [paginationModel])
 
+  const handlePageChange = params => {
+    const newPage = params.page + 1 // Add 1 to match your backend page indexing
+    setPaginationModel(prevState => ({
+      ...prevState,
+      page: newPage
+    }))
+  }
+
+  if (error) {
+    return <p>Error: {error}</p>
+  }
+  console.log('appointment data', data)
   if (error) {
     return <p>Error: {error}</p>
   }
@@ -271,7 +288,6 @@ const AppointmentList = () => {
             <CardHeader title='Filters' />
             <CardContent>
               <Grid container spacing={3}>
-              
                 <Grid item xs={12} sm={4}>
                   <DatePicker
                     isClearable
@@ -282,7 +298,8 @@ const AppointmentList = () => {
                     startDate={startDateRange}
                     shouldCloseOnSelect={false}
                     id='date-range-picker-months'
-                    onChange={handleOnChangeRange}
+
+                    // onPageChange={handlePageChange}
                     customInput={
                       <CustomInput
                         dates={dates}
@@ -305,17 +322,22 @@ const AppointmentList = () => {
           <Card>
             <DataGrid
               autoHeight
-              pagination
               rowHeight={62}
               rows={data}
               columns={columns}
               checkboxSelection
               disableRowSelectionOnClick
-              pageSizeOptions={[10, 25, 50]}
               paginationModel={paginationModel}
               onPaginationModelChange={setPaginationModel}
-              onRowSelectionModelChange={rows => setSelectedRows(
-              )}
+              onRowSelectionModelChange={rows => setSelectedRows()}
+              pagination
+              rowsPerPageOptions={[10, 30, 50, 70, 100]}
+              paginationMode='server'
+              onPageChange={handlePageChange}
+              rowCount={count}
+              page={page}
+              rowsPerPage={Number(paginationModel.limit)}
+              pageSize={page}
             />
           </Card>
         </Grid>

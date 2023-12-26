@@ -25,6 +25,8 @@ import Icon from 'src/@core/components/icon'
 import axios from 'axios';
 import { TextField } from '@mui/material'
 import { boolean } from 'yup'
+import email from 'src/store/apps/email'
+import baseUrl from 'src/API/apiConfig'
 
 const showErrors = (field, valueLen, min) => {
   if (valueLen === 0) {
@@ -80,7 +82,7 @@ const SidebarLawyer = props => {
   useEffect(() => {
     const fetchCities = async () => {
       try {
-        const response = await axios.get('https://tqneen-testing-be1-dot-tqneen-406411.ew.r.appspot.com/api/cities', {
+        const response = await axios.get(`${baseUrl}/api/cities`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -94,7 +96,7 @@ const SidebarLawyer = props => {
 
     const fetchSpecializations = async () => {
       try {
-        const response = await axios.get('https://tqneen-testing-be1-dot-tqneen-406411.ew.r.appspot.com/api/specializations', {
+        const response = await axios.get(`${baseUrl}/api/specializations`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -116,7 +118,7 @@ const SidebarLawyer = props => {
 
   const fetchAreas = async (cityId) => {
     try {
-      const response = await axios.get('https://tqneen-testing-be1-dot-tqneen-406411.ew.r.appspot.com/api/cities/' + cityId, {
+      const response = await axios.get(`${baseUrl}/api/cities/` + cityId, {
         headers: {
           Authorization: `Bearer ${token}`,
         }
@@ -149,24 +151,24 @@ const SidebarLawyer = props => {
     }
   };
 
-  // ...
-
   const onSubmit = async (data) => {
-    const { numOfExperience, fees,is_active, ...restOfData } = data
+    const { numOfExperience, fees, is_active,...restOfData } = data
+
     try {
-      const response = await axios.post('https://tqneen-testing-be1-dot-tqneen-406411.ew.r.appspot.com/api/admin/users?type=lawyer', {
+      const response = await axios.post(`${baseUrl}/api/admin/users?type=lawyer`, {
         type: "lawyer",
         numOfExperience: Number(numOfExperience),
         fees: Number(fees),
-        is_active:boolean,
-        cardImages: ["https://tqneen-testing-be1-dot-tqneen-406411.ew.r.appspot.com/images/1698842921075.webp", "https://tqneen-testing-be1-dot-tqneen-406411.ew.r.appspot.com/images/1698842921075.webp"],
-        idImages: ["https://tqneen-testing-be1-dot-tqneen-406411.ew.r.appspot.com/images/1698842921075.webp"],
+        is_active: boolean,
+        cardImages: ["https://tqneen-rlyoguxn5a-uc.a.run.app/images/1698842921075.webp", "https://tqneen-rlyoguxn5a-uc.a.run.app/images/1698842921075.webp"],
+        idImages: ["https://tqneen-rlyoguxn5a-uc.a.run.app/images/1698842921075.webp"],
         ...restOfData
       }, {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
+
       console.log(response.data);
       console.log("response.status", response.status)
 
@@ -200,6 +202,8 @@ const SidebarLawyer = props => {
           setError("phone", { message: error?.response?.data?.message })
         }
       }
+
+
 
       // Handle the error or show a notification
       console.error('An error occurred', error);
@@ -289,10 +293,9 @@ const SidebarLawyer = props => {
                 label='Email'
                 value={value}
                 sx={{ mb: 4 }}
-                onChange={onChange}
-                error={Boolean(errors.email)}
-                placeholder=''
-                {...(errors.email && { helperText: errors.email.message })}
+                onChange={onChange
+                }
+
               />
             )}
           />
@@ -338,15 +341,19 @@ const SidebarLawyer = props => {
           <Controller
             name="city"
             control={control}
+            rules={{ required: "required" }}
             defaultValue=""
             render={({ field: { onChange, ...rest } }) => (
-              <TextField
+              <CustomTextField
                 select
                 sx={{ mb: 4 }}
                 fullWidth
                 label="city"
                 onChange={handleCityChange}
                 {...rest}
+                error={Boolean(errors.city)}
+                aria-describedby='validation-area-select'
+                {...(errors.city && { helperText: errors.city.message })}
               >
                 <MenuItem value="" disabled>
                   Select an cities
@@ -356,22 +363,29 @@ const SidebarLawyer = props => {
                     {city.name.en}
                   </MenuItem>
                 ))}
-              </TextField>
+
+              </CustomTextField>
             )}
-            rules={{ required: true }}
+
+
           />
 
           <Controller
             name="area_id"
             control={control}
+            rules={{ required: "required" }}
             defaultValue=""
             render={({ field }) => (
-              <TextField
+              <CustomTextField
                 select
                 sx={{ mb: 4 }}
                 fullWidth
                 label="area"
                 {...field}
+                id='validation-area-select'
+                error={Boolean(errors.area_id)}
+                aria-describedby='validation-area-select'
+                {...(errors.area_id && { helperText: errors.area_id.message })}
               >
                 <MenuItem value="" disabled>
                   Select an Area
@@ -381,9 +395,8 @@ const SidebarLawyer = props => {
                     {area.name.en}
                   </MenuItem>
                 ))}
-              </TextField>
+              </CustomTextField>
             )}
-            rules={{ required: true }}
           />
 
 
