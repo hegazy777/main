@@ -15,7 +15,7 @@ import CardHeader from '@mui/material/CardHeader'
 import IconButton from '@mui/material/IconButton'
 import Typography from '@mui/material/Typography'
 import CardContent from '@mui/material/CardContent'
-import { DataGrid } from '@mui/x-data-grid'
+import { DataGrid, GridRow } from '@mui/x-data-grid'
 import axios from 'axios'
 
 // ** Icon Imports
@@ -23,7 +23,6 @@ import Icon from 'src/@core/components/icon'
 
 // ** Third Party Imports
 import format from 'date-fns/format'
-import DatePicker from 'react-datepicker'
 
 // ** Store & Actions Imports
 import { useDispatch, useSelector } from 'react-redux'
@@ -39,8 +38,13 @@ import TableHeader from 'src/views/apps/invoice/list/TableHeader'
 import CustomTextField from 'src/@core/components/mui/text-field'
 
 // ** Styled Components
-import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import baseUrl from 'src/API/apiConfig'
+import { useForm } from 'react-hook-form'
+import DatePicker from 'react-datepicker'
+import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
+import Spacing from 'src/@core/theme/spacing'
+import { Button } from '@mui/material'
+import { useAsync } from 'src/hooks/useAsync'
 
 // ** Styled component for the link in the dataTable
 const LinkStyled = styled(Link)(({ theme }) => ({
@@ -167,14 +171,14 @@ const AppointmentList = () => {
   const [dates, setDates] = useState([])
   const [value, setValue] = useState('')
   const [statusValue, setStatusValue] = useState('')
-  const [endDateRange, setEndDateRange] = useState(null)
-  const [selectedRows, setSelectedRows] = useState([])
-  const [startDateRange, setStartDateRange] = useState(null)
-  const [paginationModel, setPaginationModel] = useState({ page: 1, limit: 15, total: 0 })
+  // const [endDateRange, setEndDateRange] = useState(null)
+  // const [selectedRows, setSelectedRows] = useState([])
+  // const [startDateRange, setStartDateRange] = useState(null)
+  const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 15, total: 0 })
   const [error, setError] = useState(null)
-  const [data, setData] = useState([])
-  const [count, setCount] = useState(0)
-  const [page, setPage] = useState(0)
+  // const [data, setData] = useState([])
+  // const [count, setCount] = useState(0)
+  // const [page, setPage] = useState(0)
 
   // ** Hooks
   const dispatch = useDispatch()
@@ -230,119 +234,152 @@ const AppointmentList = () => {
     }
   ]
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const token =
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NTY1YTM1NjNhMjE2N2Q3NDUxNTRhZGEiLCJ0eXBlIjoiYWRtaW4iLCJpZCI6MSwiaWF0IjoxNzAyMzY2NDE0fQ.3bOsxc0tjcOThhsmUaUsw6lNIumDWp3H9sC8FjU1bcs'
-
-        const headers = {
-          Authorization: `Bearer ${token}`
-        }
-
-        const response = await axios.get(
-          `${baseUrl}/api/appointments`,
-          {
-            headers,
-            params: {
-              page: paginationModel.page, // Use the correct page parameter
-              limit: paginationModel.limit
-            }
-          }
-        )
-
-        setCount(response.data.totalDocs)
-        setData(response.data.docs)
-        setPage(response.data.totalPages)
-      } catch (error) {
-        console.error(error)
-        setError(error.message)
+  const { data, execute, loading, status } = useAsync((params = { page: paginationModel.page + 1, limit: paginationModel.limit }) => axios.get(
+    `${baseUrl}/api/appointments`,
+    {
+      headers: {
+        Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NTY1YTM1NjNhMjE2N2Q3NDUxNTRhZGEiLCJ0eXBlIjoiYWRtaW4iLCJpZCI6MSwiaWF0IjoxNzAyMzY2NDE0fQ.3bOsxc0tjcOThhsmUaUsw6lNIumDWp3H9sC8FjU1bcs`
+      },
+      params: {
+        page: params.page ?? paginationModel.page + 1, // Use the correct page parameter
+        limit: params.limit ?? paginationModel.limit
       }
     }
+  ), { immediate: true })
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const token =
+  //         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NTY1YTM1NjNhMjE2N2Q3NDUxNTRhZGEiLCJ0eXBlIjoiYWRtaW4iLCJpZCI6MSwiaWF0IjoxNzAyMzY2NDE0fQ.3bOsxc0tjcOThhsmUaUsw6lNIumDWp3H9sC8FjU1bcs'
 
-    fetchData()
-  }, [paginationModel])
+  //       const headers = {
+  //         Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NTY1YTM1NjNhMjE2N2Q3NDUxNTRhZGEiLCJ0eXBlIjoiYWRtaW4iLCJpZCI6MSwiaWF0IjoxNzAyMzY2NDE0fQ.3bOsxc0tjcOThhsmUaUsw6lNIumDWp3H9sC8FjU1bcs`
+  //       }
 
-  const handlePageChange = params => {
-    const newPage = params.page + 1 // Add 1 to match your backend page indexing
-    setPaginationModel(prevState => ({
-      ...prevState,
-      page: newPage
-    }))
+  //       const response = await
+
+  //         setCount(response.data.totalDocs)
+  //       setData(response.data.docs)
+  //       setPage(response.data.totalPages)
+  //     } catch (error) {
+  //       console.error(error)
+  //       setError(error.message)
+  //     }
+  //   }
+
+  //   fetchData()
+  // }, [paginationModel])
+
+  const handlePageChange = async (data) => {
+    console.log("handlePageChange", data)
+
+    execute({ page: (data.page) + 1, limit: data.pageSize })
+    // const newPage = params.page + 1 // Add 1 to match your backend page indexing
+
+    // setPaginationModel(prevState => ({
+    //   ...prevState,
+    //   page: newPage
+    // }))
   }
 
   if (error) {
     return <p>Error: {error}</p>
   }
-  console.log('appointment data', data)
   if (error) {
     return <p>Error: {error}</p>
   }
-  console.log(' appointment data', data)
+
+  const {
+    reset,
+    control,
+    setValue: setFormValue,
+    setError: setFormError,
+    handleSubmit,
+    formState: { errors },
+
+  } = useForm({
+
+    mode: 'onChange',
+
+  })
+
+  const onSubmit = () => {
+    alert("submit")
+  }
+
+  const CustomInput = forwardRef(({ ...props }, ref) => {
+    console.log({ props })
+    return <CustomTextField inputRef={ref}  {...props} />
+  })
 
   return (
-    <DatePickerWrapper>
-      <Grid container spacing={6}>
-        <Grid item xs={12}>
-          <Card>
+    <Grid container spacing={6}>
+      <Grid item xs={12}>
+        <Card>
+          <form onSubmit={handleSubmit(onSubmit)}>
             <CardHeader title='Filters' />
             <CardContent>
-              <Grid container spacing={3}>
-                <Grid item xs={12} sm={4}>
-                  <DatePicker
-                    isClearable
-                    selectsRange
-                    monthsShown={2}
-                    endDate={endDateRange}
-                    selected={startDateRange}
-                    startDate={startDateRange}
-                    shouldCloseOnSelect={false}
-                    id='date-range-picker-months'
+              <Grid container spacing={3} item xs={12} sm={4} >
+                <Grid item xs={12} lg={4}>
+                  <DatePickerWrapper display={"flex"} >
 
-                    // onPageChange={handlePageChange}
-                    customInput={
-                      <CustomInput
-                        dates={dates}
-                        setDates={setDates}
-                        label='Appointment DAte Filter'
-                        end={endDateRange}
-                        start={startDateRange}
-                      />
-                    }
-                  />
+                    <DatePicker
+                      selected={new Date()}
+                      id='from-date'
+                      customInput={<CustomInput label="From" />}
+                    />
+                  </DatePickerWrapper>
                 </Grid>
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={12} lg={4}>
+                  <DatePickerWrapper display={"flex"} >
+
+                    <DatePicker
+                      selected={new Date()}
+                      id='to-date'
+                      customInput={<CustomInput label="To" />}
+                    />
+                  </DatePickerWrapper>
+                </Grid>
+
+                <Grid item xs={12} lg={4}>
+                  <Button type='submit'>Submit</Button>
+                </Grid>
+
+
+
+                {/* <Grid item xs={12} sm={4}>
                   <TableHeader value={value} selectedRows={selectedRows} handleFilter={handleFilter} />
-                </Grid>
+                </Grid> */}
               </Grid>
             </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12}>
-          <Card>
-            <DataGrid
-              autoHeight
-              rowHeight={62}
-              rows={data}
-              columns={columns}
-              checkboxSelection
-              disableRowSelectionOnClick
-              paginationModel={paginationModel}
-              onPaginationModelChange={setPaginationModel}
-              onRowSelectionModelChange={rows => setSelectedRows()}
-              pagination
-              rowsPerPageOptions={[10, 30, 50, 70, 100]}
-              paginationMode='server'
-              onPageChange={handlePageChange}
-              rowCount={count}
-              page={page}
-              rowsPerPage={Number(paginationModel.limit)}
-              pageSize={page}
-            />
-          </Card>
-        </Grid>
+          </form>
+        </Card>
       </Grid>
-    </DatePickerWrapper>
+      <Grid item xs={12}>
+        <Card>
+          <DataGrid
+            loading={loading}
+            autoHeight
+            rowHeight={62}
+            rows={data?.docs ?? []}
+            columns={columns}
+            checkboxSelection
+            disableRowSelectionOnClick
+            paginationModel={{ page: data?.page - 1, pageSize: data?.limit }}
+            onPaginationModelChange={handlePageChange}
+            onRowSelectionModelChange={rows => setSelectedRows()}
+            pagination
+            rowsPerPageOptions={[10, 30, 50, 70, 100]}
+            paginationMode='server'
+            // onPageChange={handlePageChange}
+            rowCount={data?.totalDocs}
+            page={data?.totalPages}
+            // rowsPerPage={Number(paginationModel.limit)}
+            pageSize={data?.totalPages}
+          />
+        </Card>
+      </Grid>
+    </Grid >
   )
 }
 

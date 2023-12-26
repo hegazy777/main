@@ -39,5 +39,8 @@
   "markdown.extension.toc.updateOnSave": false,
   "[javascript]": {
     "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
   }
 }
