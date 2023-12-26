@@ -25,7 +25,6 @@ import Icon from 'src/@core/components/icon'
 import axios from 'axios';
 import { TextField } from '@mui/material'
 import { boolean } from 'yup'
-import email from 'src/store/apps/email'
 import baseUrl from 'src/API/apiConfig'
 
 const showErrors = (field, valueLen, min) => {
