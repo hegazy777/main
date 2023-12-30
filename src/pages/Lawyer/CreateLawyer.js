@@ -26,6 +26,7 @@ import Icon from 'src/@core/components/icon'
 import axios from 'axios';
 import { TextField } from '@mui/material'
 import { boolean } from 'yup'
+import FileUploaderSingle from 'src/views/forms/form-elements/file-uploader/FileUploaderSingle'
 
 
 const showErrors = (field, valueLen, min) => {
@@ -63,6 +64,7 @@ const SidebarLawyer = props => {
     setValue,
     setError,
     handleSubmit,
+    getValues,
     formState: { errors },
 
   } = useForm({
@@ -75,8 +77,29 @@ const SidebarLawyer = props => {
   const router = useRouter()
   const returnUrl = router.query.returnUrl
 
+  const fileUpload = async (files) => {
+    const file = files[0];
 
+    const formData = new FormData();
 
+    formData.append('image', file);
+
+    return await axios.post('https://tqneen-rlyoguxn5a-uc.a.run.app/images', formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+
+      }
+    })
+  }
+
+  const handleIdImageUplod = async (files) => {
+
+    const response = await fileUpload(files)
+
+    setValue("idImages", response?.data?.url)
+
+    console.log(getValues())
+  }
 
   // get cities data
   useEffect(() => {
@@ -152,7 +175,7 @@ const SidebarLawyer = props => {
   };
 
   const onSubmit = async (data) => {
-    const { numOfExperience, fees, is_active,...restOfData } = data
+    const { numOfExperience, fees, is_active, ...restOfData } = data
 
     try {
       const response = await axios.post(`${baseUrl}/api/admin/users?type=lawyer`, {
@@ -161,7 +184,7 @@ const SidebarLawyer = props => {
         fees: Number(fees),
         is_active: boolean,
         cardImages: ["https://tqneen-rlyoguxn5a-uc.a.run.app/images/1698842921075.webp", "https://tqneen-rlyoguxn5a-uc.a.run.app/images/1698842921075.webp"],
-        idImages: ["https://tqneen-rlyoguxn5a-uc.a.run.app/images/1698842921075.webp"],
+        idImages: [restOfData.idImages],
         ...restOfData
       }, {
         headers: {
@@ -550,6 +573,14 @@ const SidebarLawyer = props => {
                 <MenuItem value='false'>False</MenuItem>
               </CustomTextField>
             )}
+          />
+          <Controller
+            name='file'
+            control={control}
+            rules={{ required: false }}
+            render={({ field: { value, onChange } }) =>
+              <FileUploaderSingle onUploadCallBack={handleIdImageUplod} />
+            }
           />
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Button type='submit' variant='contained' sx={{ mr: 3 }} >

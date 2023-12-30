@@ -11,7 +11,7 @@ import Icon from 'src/@core/components/icon'
 // ** Third Party Imports
 import { useDropzone } from 'react-dropzone'
 
-const FileUploaderSingle = () => {
+const FileUploaderSingle = ({ onUploadCallBack }) => {
   // ** State
   const [files, setFiles] = useState([])
 
@@ -21,13 +21,15 @@ const FileUploaderSingle = () => {
     accept: {
       'image/*': ['.png', '.jpg', '.jpeg', '.gif']
     },
-    onDrop: acceptedFiles => {
+    onDrop: async (acceptedFiles) => {
+
       setFiles(acceptedFiles.map(file => Object.assign(file)))
+      if (onUploadCallBack) { await onUploadCallBack(acceptedFiles) }
     }
   })
 
   const img = files.map(file => (
-    <img key={file.name} alt={file.name} className='single-file-image' src={URL.createObjectURL(file)} />
+    <img key={file.name} alt={file.name} className='single-file-image' src={URL.createObjectURL(file)} style={{ width: "100%" }} />
   ))
 
   return (
