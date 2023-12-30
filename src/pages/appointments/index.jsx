@@ -10,23 +10,19 @@ import Grid from '@mui/material/Grid'
 import Card from '@mui/material/Card'
 import Tooltip from '@mui/material/Tooltip'
 import { styled } from '@mui/material/styles'
-import MenuItem from '@mui/material/MenuItem'
 import CardHeader from '@mui/material/CardHeader'
 import IconButton from '@mui/material/IconButton'
 import Typography from '@mui/material/Typography'
 import CardContent from '@mui/material/CardContent'
-import { DataGrid, GridRow } from '@mui/x-data-grid'
+import { DataGrid } from '@mui/x-data-grid'
 import axios from 'axios'
 
 // ** Icon Imports
 import Icon from 'src/@core/components/icon'
 
-// ** Third Party Imports
-import format from 'date-fns/format'
-
 // ** Store & Actions Imports
-import { useDispatch, useSelector } from 'react-redux'
-import { fetchData, deleteInvoice } from 'src/store/apps/invoice'
+import { useDispatch } from 'react-redux'
+import { fetchData } from 'src/store/apps/invoice'
 
 // ** Utils Import
 import { getInitials } from 'src/@core/utils/get-initials'
@@ -34,17 +30,16 @@ import { getInitials } from 'src/@core/utils/get-initials'
 // ** Custom Components Imports
 import CustomChip from 'src/@core/components/mui/chip'
 import CustomAvatar from 'src/@core/components/mui/avatar'
-import TableHeader from 'src/views/apps/invoice/list/TableHeader'
 import CustomTextField from 'src/@core/components/mui/text-field'
 
 // ** Styled Components
 import baseUrl from 'src/API/apiConfig'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import DatePicker from 'react-datepicker'
 import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
-import Spacing from 'src/@core/theme/spacing'
-import { Button } from '@mui/material'
+import { Button, MenuItem } from '@mui/material'
 import { useAsync } from 'src/hooks/useAsync'
+import { format } from 'date-fns'
 
 // ** Styled component for the link in the dataTable
 const LinkStyled = styled(Link)(({ theme }) => ({
@@ -53,12 +48,6 @@ const LinkStyled = styled(Link)(({ theme }) => ({
   color: `${theme.palette.primary.main} !important`
 }))
 
-// ** Vars
-const userStatusObj = {
-  rejected: 'success',
-  pending: 'primary',
-  false: 'secondary'
-}
 
 // ** renders client column
 const renderClient = row => {
@@ -100,7 +89,7 @@ const defaultColumns = [
               {row.lawyer.full_name}
             </Typography>
             <Typography noWrap variant='body2' sx={{ color: 'text.disabled' }}>
-              {row.lawyer.phone}
+              {row.lawyer.toDate}
             </Typography>
           </Box>
         </Box>
@@ -154,60 +143,11 @@ const defaultColumns = [
     }
   }
 ]
-/* eslint-disable */
-const CustomInput = forwardRef((props, ref) => {
-  const startDate = props.start !== null ? format(props.start, 'MM/dd/yyyy') : ''
-  const endDate = props.end !== null ? ` - ${format(props.end, 'MM/dd/yyyy')}` : null
-  const value = `${startDate}${endDate !== null ? endDate : ''}`
-  props.start === null && props.dates.length && props.setDates ? props.setDates([]) : null
-  const updatedProps = { ...props }
-  delete updatedProps.setDates
-  return <CustomTextField fullWidth inputRef={ref} {...updatedProps} label={props.label || ''} value={value} />
-})
 
-/* eslint-enable */
 const AppointmentList = () => {
   // ** State
-  const [dates, setDates] = useState([])
-  const [value, setValue] = useState('')
-  const [statusValue, setStatusValue] = useState('')
-  // const [endDateRange, setEndDateRange] = useState(null)
-  // const [selectedRows, setSelectedRows] = useState([])
-  // const [startDateRange, setStartDateRange] = useState(null)
-  const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 15, total: 0 })
-  const [error, setError] = useState(null)
-  // const [data, setData] = useState([])
-  // const [count, setCount] = useState(0)
-  // const [page, setPage] = useState(0)
-
-  // ** Hooks
-  const dispatch = useDispatch()
-  useEffect(() => {
-    dispatch(
-      fetchData({
-        dates,
-        q: value,
-        status: statusValue
-      })
-    )
-  }, [dispatch, statusValue, value, dates])
-
-  const handleFilter = val => {
-    setValue(val)
-  }
-
-  const handleStatusValue = e => {
-    setStatusValue(e.target.value)
-  }
-
-  const handleOnChangeRange = dates => {
-    const [start, end] = dates
-    if (start !== null && end !== null) {
-      setDates(dates)
-    }
-    setStartDateRange(start)
-    setEndDateRange(end)
-  }
+  const [pageSize] = useState(15)
+  const [filters, setFilters] = useState({})
 
   const columns = [
     ...defaultColumns,
@@ -234,81 +174,61 @@ const AppointmentList = () => {
     }
   ]
 
-  const { data, execute, loading, status } = useAsync((params = { page: paginationModel.page + 1, limit: paginationModel.limit }) => axios.get(
+  const { data, execute, loading, status, error } = useAsync((params) => axios.get(
     `${baseUrl}/api/appointments`,
     {
       headers: {
         Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NTY1YTM1NjNhMjE2N2Q3NDUxNTRhZGEiLCJ0eXBlIjoiYWRtaW4iLCJpZCI6MSwiaWF0IjoxNzAyMzY2NDE0fQ.3bOsxc0tjcOThhsmUaUsw6lNIumDWp3H9sC8FjU1bcs`
       },
-      params: {
-        page: params.page ?? paginationModel.page + 1, // Use the correct page parameter
-        limit: params.limit ?? paginationModel.limit
+      params: Object.assign({
+        page: params?.page ?? 1,
+        limit: pageSize,
       }
+        , params?.filters ?? {})
     }
   ), { immediate: true })
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const token =
-  //         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NTY1YTM1NjNhMjE2N2Q3NDUxNTRhZGEiLCJ0eXBlIjoiYWRtaW4iLCJpZCI6MSwiaWF0IjoxNzAyMzY2NDE0fQ.3bOsxc0tjcOThhsmUaUsw6lNIumDWp3H9sC8FjU1bcs'
 
-  //       const headers = {
-  //         Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NTY1YTM1NjNhMjE2N2Q3NDUxNTRhZGEiLCJ0eXBlIjoiYWRtaW4iLCJpZCI6MSwiaWF0IjoxNzAyMzY2NDE0fQ.3bOsxc0tjcOThhsmUaUsw6lNIumDWp3H9sC8FjU1bcs`
-  //       }
+  const handlePageChange = async (paginationData) => {
+    console.log("handlePageChange", paginationData)
 
-  //       const response = await
-
-  //         setCount(response.data.totalDocs)
-  //       setData(response.data.docs)
-  //       setPage(response.data.totalPages)
-  //     } catch (error) {
-  //       console.error(error)
-  //       setError(error.message)
-  //     }
-  //   }
-
-  //   fetchData()
-  // }, [paginationModel])
-
-  const handlePageChange = async (data) => {
-    console.log("handlePageChange", data)
-
-    execute({ page: (data.page) + 1, limit: data.pageSize })
-    // const newPage = params.page + 1 // Add 1 to match your backend page indexing
-
-    // setPaginationModel(prevState => ({
-    //   ...prevState,
-    //   page: newPage
-    // }))
+    await execute({ page: (paginationData?.page) + 1, pageSize: pageSize, filters })
   }
 
   if (error) {
     return <p>Error: {error}</p>
   }
-  if (error) {
-    return <p>Error: {error}</p>
-  }
+
 
   const {
-    reset,
     control,
-    setValue: setFormValue,
-    setError: setFormError,
     handleSubmit,
     formState: { errors },
-
   } = useForm({
 
     mode: 'onChange',
 
   })
 
-  const onSubmit = () => {
-    alert("submit")
+
+  const onSubmit = (data) => {
+    console.log({ data })
+
+    setFilters(Object.assign(
+      data?.fromDate ? { from: format(data.fromDate, "yyyy-MM-dd") } : {},
+      data?.toDate ? { to: format(data.toDate, "yyyy-MM-dd") } : {},
+      data?.status ? { status: data?.status } : {}
+    ))
+
+    execute({
+      page: 1, pageSize: pageSize, filters: Object.assign(
+        data?.fromDate ? { from: format(data.fromDate, "yyyy-MM-dd") } : {},
+        data?.toDate ? { to: format(data.toDate, "yyyy-MM-dd") } : {},
+        data?.status ? { status: data?.status } : {}
+      )
+    })
   }
 
   const CustomInput = forwardRef(({ ...props }, ref) => {
-    console.log({ props })
     return <CustomTextField inputRef={ref}  {...props} />
   })
 
@@ -322,27 +242,86 @@ const AppointmentList = () => {
               <Grid container spacing={3} item xs={12} sm={4} >
                 <Grid item xs={12} lg={4}>
                   <DatePickerWrapper display={"flex"} >
+                    <Controller
+                      name='fromDate'
+                      control={control}
+                      render={({ field: { value, onChange } }) => (
+                        <DatePicker
+                          id='fromDate'
+                          onChange={onChange}
+                          selected={value}
+                          autoComplete="off"
+                          customInput={<CustomInput label="From" />}
+                        />
 
-                    <DatePicker
-                      selected={new Date()}
-                      id='from-date'
-                      customInput={<CustomInput label="From" />}
+                      )}
                     />
                   </DatePickerWrapper>
                 </Grid>
                 <Grid item xs={12} lg={4}>
                   <DatePickerWrapper display={"flex"} >
+                    <Controller
+                      rules={{
+                        validate: (value, fields) => {
+                          if (fields && fields?.fromDate && fields.fromDate > value)
+                            return "from date must be less than to date"
+                        }
+                      }}
+                      name='toDate'
+                      control={control}
+                      render={({ field: { value, onChange } }) => (
+                        <DatePicker
+                          id='toDate'
+                          onChange={onChange}
+                          selected={value}
+                          autoComplete="off"
+                          customInput={<CustomInput label="To"
+                            error={Boolean(errors.toDate)}
+                            helperText={errors.toDate?.message}
+                            {...(errors.toDate && { helperText: errors.toDate.message })}
 
-                    <DatePicker
-                      selected={new Date()}
-                      id='to-date'
-                      customInput={<CustomInput label="To" />}
+                          />}
+                        />
+
+                      )}
                     />
                   </DatePickerWrapper>
                 </Grid>
 
                 <Grid item xs={12} lg={4}>
-                  <Button type='submit'>Submit</Button>
+                  <Controller
+                    name="status"
+                    control={control}
+                    defaultValue=""
+                    render={({ field: { onChange, ...rest } }) => (
+                      <CustomTextField
+                        select
+                        sx={{ mb: 4 }}
+                        fullWidth
+                        onChange={onChange}
+                        label="Status"
+                        {...rest}
+
+
+                      >
+                        <MenuItem  >
+
+                        </MenuItem>
+                        {["accepted", "rejected", "paid"].map((status) => (
+                          <MenuItem key={status} value={status}>
+                            {status.toUpperCase()}
+                          </MenuItem>
+                        ))}
+
+                      </CustomTextField>
+                    )}
+
+
+                  />
+                </Grid>
+
+                <Grid item xs={12} lg={4} display={"flex"} alignItems={"end"}>
+                  <Button type='submit' variant='contained'>Submit</Button>
                 </Grid>
 
 
@@ -364,18 +343,15 @@ const AppointmentList = () => {
             rows={data?.docs ?? []}
             columns={columns}
             checkboxSelection
+
             disableRowSelectionOnClick
-            paginationModel={{ page: data?.page - 1, pageSize: data?.limit }}
+            paginationModel={{ page: (data?.page ?? 1) - 1, pageSize: data?.limit ?? pageSize }}
             onPaginationModelChange={handlePageChange}
-            onRowSelectionModelChange={rows => setSelectedRows()}
             pagination
-            rowsPerPageOptions={[10, 30, 50, 70, 100]}
             paginationMode='server'
-            // onPageChange={handlePageChange}
             rowCount={data?.totalDocs}
-            page={data?.totalPages}
-            // rowsPerPage={Number(paginationModel.limit)}
-            pageSize={data?.totalPages}
+            rowsPerPage={15}
+
           />
         </Card>
       </Grid>

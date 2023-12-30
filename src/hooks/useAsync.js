@@ -5,6 +5,7 @@ export function useAsync(
   { immediate = false }
 ) {
   const [data, setData] = useState(null);
+  const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("idle");
 
@@ -20,9 +21,9 @@ export function useAsync(
           setStatus("success")
 
         })
-        .catch(() => {
+        .catch((error) => {
           setLoading(false)
-
+          setError(error)
         });
     },
     [asyncFunction]
@@ -33,5 +34,5 @@ export function useAsync(
       execute();
   }, []);
 
-  return { execute, data, loading, status };
+  return { execute, data, loading, status, error };
 }
